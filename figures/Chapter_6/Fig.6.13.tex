@@ -1,0 +1,57 @@
+\documentclass{standalone}
+\usepackage{protocol}
+\usepackage{amssymb}
+
+%=================MathAbbrevs=====================
+\newcommand{\bits}{\ensuremath{\{0,1\}}\xspace}
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+%=================CryptoPrimitives=====================
+\newcommand{\HKDF}{\mathsf{HKDF}}
+\newcommand{\MAC}{\mathsf{HMAC}}
+\newcommand{\TRU}{\mathsf{TRUNC}}
+\newcommand{\HASH}[1]{\mathsf{H}(#1)}
+
+\begin{document}
+
+\begin{protocol}{2}
+%\protocolheader{\"Offentliche Parameter: (p,g)}\\
+\participants{
+\doesinabox{$A$ (newSTA)\\$pw$}}{
+\doesinabox{$B$ (CCo)\\$pw$}}
+
+\protocolline
+%\doesB{ }
+\subprotocolcaption{$x_i \leftarrow \HASH{pw|ID_A|ID_B|i}$}
+\subprotocolcaption{$ \exists y_i :  (x_i,y_i) \in EC(a,b)  \Rightarrow P \leftarrow (x_i,y_i) $}
+\protocolline
+
+\doesB{}
+\doesA{$r_A,m_A \rand \mathbb{Z}_q$}
+\doesA{$s_A \leftarrow (r_A+m_A) \bmod q$}
+\doesA{$E_A \leftarrow - m_A \cdot P$}
+
+\AtoB{s_A,E_A}
+
+\doesB{$r_B,m_B \rand \mathbb{Z}_q$}
+\doesB{$s_B \leftarrow (r_B+m_B) \bmod q$}
+\doesB{$E_B \leftarrow - m_B \cdot P$}
+
+\AfromB{s_B,E_B}
+
+\doesA{$K \leftarrow r_A \cdot (s_B \cdot P + E_B)$}
+\doesA{$\kappa \leftarrow \HASH{K_x}$}
+\doesA{$trans_A \leftarrow s_A|E_A|s_B|E_B$}
+\doesA{$mac_A \leftarrow \MAC(\kappa,trans_A)$}
+
+\AtoB{mac_A}
+
+\doesB{$K \leftarrow r_B \cdot (s_A \cdot P + E_A)$}
+\doesB{$\kappa \leftarrow \HASH{K_x}$}
+\doesB{$trans_B \leftarrow s_B|E_B|s_A|E_A$}
+\doesB{$mac_B \leftarrow \MAC(\kappa,trans_B)$}
+
+\AfromB{mac_B}
+
+\end{protocol}
+
+\end{document}
