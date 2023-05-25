@@ -1,0 +1,33 @@
+\documentclass{standalone}
+\usepackage{protocol}
+\usepackage{amssymb}
+
+%=================MathAbbrevs=====================
+\newcommand{\bits}{\ensuremath{\{0,1\}}\xspace}
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+%=================CryptoPrimitives=====================
+\newcommand{\HKDF}{\mathsf{HKDF}}
+\newcommand{\MAC}{\mathsf{HMAC}}
+\newcommand{\TRU}{\mathsf{TRUNC}}
+
+\begin{document}
+
+\begin{protocol}{2}
+\protocolheader{Public parameters: $(EC(a,b),P,q)$}\\
+\participants{
+\doesinabox{$Alice$}}{
+\doesinabox{$Bob$}}
+\protocolline
+\doesB{ }
+\doesA{$a \rand \mathbb{Z}_{q}$}
+\doesA{$\alpha \leftarrow a \cdot P$}
+\AtoB{\alpha}
+\doesB{$b \rand \mathbb{Z}_{q}$}
+\doesB{$\beta \leftarrow b \cdot P$}
+\AfromB{\beta}
+\doesB{$k \leftarrow b \cdot \alpha = ba \cdot P$}
+\doesA{$k \leftarrow a \cdot \beta = ab \cdot P$}
+
+\end{protocol}
+
+\end{document}
