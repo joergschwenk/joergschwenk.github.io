@@ -1,0 +1,37 @@
+\documentclass{standalone}
+\usepackage{protocol}
+
+%=================MathAbbrevs=====================
+\newcommand{\bits}{\ensuremath{\{0,1\}}\xspace}
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+%=================CryptoPrimitives=====================
+\newcommand{\HKDF}{\mathsf{HKDF}}
+\newcommand{\MAC}{\mathsf{HMAC}}
+\newcommand{\TRU}{\mathsf{TRUNC}}
+
+\begin{document}
+
+\begin{protocol}{2}
+   \participants{
+       \doesinabox{{\bf $A$}\\  $k_{AB}$, $\Delta=30s$}}{
+       \doesinabox{{\bf $B$}\\  $k_{AB}$, $\Delta=30s$}}
+
+\doesA{}
+
+\doesA{$t_A \leftarrow getTime()$}
+\doesA{$T_A \leftarrow \lfloor \frac{t_a}{\Delta} \rfloor$}
+\doesA{$mac_A \leftarrow \MAC(k_{AB},T_A)$}
+\doesA{$otp_A \leftarrow \TRU(mac_A)$}
+
+\AtoB{otp_A}
+
+\doesB{$t_B \leftarrow getTime()$}
+\doesB{$T_B \leftarrow \lfloor \frac{t_B}{\Delta} \rfloor$}
+\doesB{$mac_B \leftarrow \MAC(k_{AB},T_B)$}
+\doesB{$mac'_B \leftarrow \MAC(k_{AB},T_B-1)$}
+\doesB{If $otp_A \neq \TRU(mac_B)$}
+\doesB{and $otp_A \neq \TRU(mac'_B)$}
+\doesB{ reject else accept}
+\end{protocol}
+
+\end{document}

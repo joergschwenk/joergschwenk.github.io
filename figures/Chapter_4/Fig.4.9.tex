@@ -1,0 +1,45 @@
+\documentclass{standalone}
+\usepackage{protocol}
+\usepackage{amssymb}
+
+%=================MathAbbrevs=====================
+\newcommand{\bits}{\ensuremath{\{0,1\}}\xspace}
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+%=================CryptoPrimitives=====================
+\newcommand{\HKDF}{\mathsf{HKDF}}
+\newcommand{\MAC}{\mathsf{HMAC}}
+\newcommand{\TRU}{\mathsf{TRUNC}}
+
+\begin{document}
+
+\begin{protocol}{3}
+   \participants{
+       \doesinabox{{\bf $A$}}}{
+       \doesinabox{{\bf {$\mathcal Adv$}}}}{
+       \doesinabox{{\bf $B$}}}
+
+\doesA{}
+
+\doesA{$a \rand \mathbb{Z}_q$}
+\doesA{$\alpha \leftarrow g^a$}
+
+\AtoB{\alpha}
+
+\doesC{$b \rand \mathbb{Z}_q$}
+\doesC{$\beta \leftarrow g^b$}
+
+\BfromC{\beta}
+
+\doesB{$x \rand \mathbb{Z}_q$}
+\doesB{$X \leftarrow g^x$}
+
+\AfromB{X}
+\BtoC{X}
+
+\doesA{$k_1 \leftarrow X^a$}
+\doesB{$k_1 \leftarrow \alpha^x$}
+\doesB{$k_2 \leftarrow \beta^x$}
+\doesC{$k_2 \leftarrow X^b$}
+\end{protocol}
+
+\end{document}

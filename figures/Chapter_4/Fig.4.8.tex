@@ -1,0 +1,38 @@
+\documentclass{standalone}
+\usepackage{protocol}
+
+%=================MathAbbrevs=====================
+\newcommand{\bits}{\ensuremath{\{0,1\}}\xspace}
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+%=================CryptoPrimitives=====================
+\newcommand{\KDF}{\mathsf{KDF}}
+\newcommand{\MAC}{\mathsf{HMAC}}
+\newcommand{\prf}{\mathsf{PRF}}
+\newcommand{\SIG}{\mathsf{SIG.Sign}}
+
+\begin{document}
+
+\begin{protocol}{2}
+
+\participants{
+\doesinabox{$A$\\$(sk_A,pk_A)$}}{
+\doesinabox{$B$\\$(sk_B,pk_B)$}}
+
+\doesA{}
+
+\doesA{$a \rand \bits^\lambda$}
+\doesA{$\alpha \leftarrow g^a$}
+\doesA{$\sigma_A \leftarrow \SIG_{sk_A}(\alpha)$}
+\AtoB{\alpha,\sigma_A}
+
+\doesB{$b \rand \bits^\lambda$}
+\doesB{$\beta \leftarrow g^b$}
+\doesB{$\sigma_B \leftarrow \SIG_{sk_B}(\beta)$}
+\doesB{$k \leftarrow \KDF(\alpha^b)$}
+\AfromB{\beta,\sigma_B}
+
+\doesA{$k \leftarrow \KDF(\beta^a)$}
+
+\end{protocol}
+
+\end{document}

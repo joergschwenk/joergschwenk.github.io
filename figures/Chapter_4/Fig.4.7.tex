@@ -1,0 +1,28 @@
+\documentclass{standalone}
+\usepackage{protocol}
+
+%=================MathAbbrevs=====================
+\newcommand{\bits}{\ensuremath{\{0,1\}}\xspace}
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+%=================CryptoPrimitives=====================
+\newcommand{\HKDF}{\mathsf{HKDF}}
+\newcommand{\MAC}{\mathsf{HMAC}}
+\newcommand{\prf}{\mathsf{PRF}}
+
+\begin{document}
+
+\begin{protocol}{2}
+%\protocolheader{RSA-KEM Key Transport}\\
+\participants{
+\doesinabox{$A$\\$k_{AB}$}}{
+\doesinabox{$B$\\$k_{AB}$}}
+\doesA{}
+\doesA{$n_A \rand \{0,1\}^\kappa$}
+\AtoB{n_A}
+\doesB{$n_B \rand \{0,1\}^\kappa$}
+\AfromB{n_B}
+\doesA{$k \leftarrow \prf_{k_{AB}}(n_A,n_B)$}
+\doesB{$k \leftarrow \prf_{k_{AB}}(n_A,n_B)$}
+\end{protocol}
+
+\end{document}

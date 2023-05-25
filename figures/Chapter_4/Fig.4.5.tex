@@ -1,0 +1,29 @@
+\documentclass{standalone}
+\usepackage{protocol}
+
+%=================MathAbbrevs=====================
+\newcommand{\bits}{\ensuremath{\{0,1\}}\xspace}
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+%=================CryptoPrimitives=====================
+\newcommand{\HKDF}{\mathsf{HKDF}}
+\newcommand{\MAC}{\mathsf{HMAC}}
+\newcommand{\TRU}{\mathsf{TRUNC}}
+
+\begin{document}
+
+\begin{protocol}{2}
+
+\participants{
+\doesinabox{$A$\\$(sk_A,pk_A,cert_A(A,pk_A))$}}{
+\doesinabox{$B$\\$pk_{CA}$}}
+\doesB{}
+\doesB{$chall \rand \{0,1\}^\lambda$}
+\AfromB{chall}
+\doesA{$res \leftarrow \mathsf{SIG.Sign}(sk_A;chall)$}
+\AtoB{res,cert_A}
+\doesB{$\mathsf{SIG.Verify}(pk_{CA};cert_A)$}
+\doesB{$pk_A \leftarrow cert_A$}
+\doesB{$\mathsf{SIG.Verify}(pk_A;res,chall)$}
+\end{protocol}
+
+\end{document}

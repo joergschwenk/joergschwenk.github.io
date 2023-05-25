@@ -1,0 +1,28 @@
+\documentclass{standalone}
+\usepackage{protocol}
+
+%=================MathAbbrevs=====================
+\newcommand{\bits}{\ensuremath{\{0,1\}}\xspace}
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+%=================CryptoPrimitives=====================
+\newcommand{\HKDF}{\mathsf{HKDF}}
+\newcommand{\MAC}{\mathsf{MAC}}
+\newcommand{\TRU}{\mathsf{TRUNC}}
+
+\begin{document}
+
+\begin{protocol}{2}
+
+\participants{
+\doesinabox{$A$\\$k_{AB}$}}{
+\doesinabox{$B$\\$k_{AB}$}}
+\doesB{}
+\doesB{$chall \rand \{0,1\}^\lambda$}
+\AfromB{chall}
+\doesA{$res \leftarrow \MAC_{k_{AB}}(chall)$}
+\AtoB{res}
+\doesB{verify if $res = \MAC_{k_{AB}}(chall)$}
+\doesB{}
+\end{protocol}
+
+\end{document}
