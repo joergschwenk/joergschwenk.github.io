@@ -1,0 +1,73 @@
+\documentclass{standalone}
+\usepackage{protocol}
+\usepackage{amsmath}
+
+
+\newcommand{\MAC}{\ensuremath{\mathsf{MAC}}}
+\newcommand{\SIG}{\ensuremath{\mathsf{SIG}}}
+\newcommand{\AENC}{\ensuremath{\mathsf{AE}}}
+\newcommand{\Enc}{\ensuremath{\mathsf{Enc}}}
+\newcommand{\bits}{{\{0,1\}}}
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+
+\begin{document}
+
+\begin{protocol}{2}
+
+
+\participants{\doesinabox{Client \\ $ $}}
+		{\doesinabox{Server \\ $(cert_S,sk_S),k_S$}}
+\protocolline
+
+\doesA{$r_C \rand \bits^\lambda$, $x \rand Z_q $}
+\doesA{$CKS=(X\leftarrow g^x,X\leftarrow xP)$}
+\doesA{Supported signatures $\overrightarrow{sig}$}
+\doesA{$SNI=DN_S$}
+\doesA{$ext_1=(CKS,SNI,\overrightarrow{sig})$}
+\doesA{$CH=(r_C,\overrightarrow{cs},ext_1)$}
+
+
+\AtoB{CH}
+
+\doesB{select $cert_S$ from SNI}
+\doesB{$r_S \rand \bits^\lambda$, $y \rand Z_q$}
+\doesB{$ext_2=SKS=Y \leftarrow g^y$}
+\doesB{$SH=(r_S,cs,ext_2)$}
+
+\AfromB{SH}
+
+
+\participants{\doesinabox{$(EC)DHE \leftarrow Y^x$ \\ $H_1 \leftarrow h(CH|SH)$ \\  derive $tk_{hs},k_{fin}$}}
+		{\doesinabox{$(EC)DHE \leftarrow X^y$ \\ $H_1 \leftarrow h(CH|SH)$\\ 
+						derive $tk_{hs},k_{fin}$}}
+
+\protocolline{encrypted: tk_{hs} }
+
+\doesB{$EE=(ext_3)$}
+\doesB{$H_2 \leftarrow h(CH|...|EE)$}
+\doesB{$CRT=cert_{S}$}
+\doesB{$CV \leftarrow \SIG(sk_{ID_S};H_2|CRT)$}
+\doesB{$H_3 \leftarrow h(CH|...|CV)$}
+\doesB{$FS \leftarrow \MAC_{k^S_{fin}}(H_3)$}
+
+\AfromB{EE,CRT,CV,FS}
+
+\participants{\doesinabox{$H_4 \leftarrow h(CH|...|FS)$ \\  derive $tk_{data}$}}
+		{\doesinabox{$H_4 \leftarrow h(CH|...|FS)$\\ derive $tk_{data}$}}
+%\doesA{$CRT^*=cert_{ID_C}(pk_{ID_C})$}
+%\doesA{$CV^*=\SIG(sk_{ID_C};H_4,CRT^*)$}
+\doesA{$FC \leftarrow \MAC_{k^C_{fin}}(H_4)$}
+
+\AtoB{FC}
+
+\participants{\doesinabox{$H_5 \leftarrow h(CH|...|FC)$ \\  derive $k_{CS}$}}
+		{\doesinabox{$H_5 \leftarrow h(CH|...|FC)$\\ derive $k_{CS}$}}
+
+\doesB{$NSTM=\Enc_{k_S}(k_{CS})$}
+
+\protocolline{encrypted: tk_{data} }
+\AfromB{NSTM}
+
+\end{protocol}
+
+\end{document}

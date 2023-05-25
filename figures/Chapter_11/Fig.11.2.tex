@@ -1,0 +1,85 @@
+\documentclass{standalone}
+\usepackage{protocol}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+
+%---------------IKE abbreviations-----------------
+\newcommand{\ckyi}{\ensuremath{\mathsf{SPI_I}}}
+\newcommand{\ckyr}{\ensuremath{\mathsf{SPI_R}}}
+
+%-------------cryptographic primitives-----------------
+\newcommand{\PRF}[2]{\mathsf{PRF}_{#1}(#2)}
+\newcommand{\iprf}[2]{\mathsf{IPRF}_{#1}(#2)}
+\newcommand{\MAC}[2]{\mathsf{MAC}_{#1}(#2)}
+\newcommand{\SE}{\mathsf{SE}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\ENC}[2]{\mathsf{Enc}_{#1}(#2)}
+\newcommand{\DEC}[2]{\mathsf{Dec}_{#1}(#2)}
+\newcommand{\Decrypt}{\mathsf{Decrypt}}
+\newcommand{\Encrypt}{\mathsf{Encrypt}}
+\newcommand{\SIGN}{\mathsf{Sign}}
+\newcommand{\Vfy}{\mathsf{Vfy}}
+\newcommand{\Hash}{\mathsf{h}}
+\newcommand{\PKE}{\mathsf{PK.Enc}}
+\newcommand{\PKD}{\mathsf{PK.Dec}}
+\newcommand{\MD}{\mathsf{H}}
+\newcommand{\KDF}{\mathsf{KDF}}
+
+%---------------Algo-------------------
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+\newcommand{\bits}{\{0,1\}}
+
+\begin{document}
+
+
+
+\begin{protocol}{2}
+
+\participants{\doesinabox{Client $C$\\ }}
+		{\doesinabox{Server $S$\\ $(sk_S,pk_S,cert_S)$}}
+
+%----------------------------------------
+\protocolline
+
+
+\doesA{$r_C \rand \bits^{256}$}
+
+\doesA{$CH \leftarrow (r_C,\overrightarrow{enc},\overrightarrow{hash},\overrightarrow{certreq},\overrightarrow{keyex})$}
+\AtoB{CH}
+
+\doesB{$r_S \rand \bits^{256}$}
+
+\doesB{$SH \leftarrow (r_S,enc,hash,cert_S,keyex)$}
+
+
+\AfromB{SH}
+
+
+\doesA{$pk_S \leftarrow cert_S$}
+\doesA{$mk \rand \bits^{\alpha}$}
+\doesA{$c \leftarrow \PKE_{pk_S}(mk)$}
+\doesA{$(k_{enc}^C,k_{end}^S,k_{mac}^C,k_{mac}^S) \leftarrow \KDF(label,mk,r_C,r_S,cert_S)$}
+
+\doesA{$mac_C \leftarrow \MD(k_{mac}^C|\MD({\tt cvp}|CH|SH)$}
+\doesA{$CMK \leftarrow (c,mac_C)$}
+
+\AtoB{CMK}
+
+\doesB{$mk \leftarrow \PKD_{sk_S}(c)$}
+
+\doesB{$(k_{enc}^C,k_{end}^S,k_{mac}^C,k_{mac}^S) \leftarrow \KDF(label,mk,r_C,r_S,cert_S)$}
+\doesB{$SID \rand \bits^{8\cdot 32}$}
+\doesB{$mac_S \leftarrow \MD(k_{mac}^S|\MD({\tt sr}|r_C|r_S|SID)$}
+\doesB{$SV \leftarrow (SID,mac_S)$}
+
+
+\AfromB{SV}
+
+
+
+\end{protocol}
+
+
+
+\end{document}

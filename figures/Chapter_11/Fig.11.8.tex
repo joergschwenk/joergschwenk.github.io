@@ -1,0 +1,80 @@
+\documentclass{standalone}
+\usepackage{protocol}
+
+
+\newcommand{\HKDF}{\mathsf{HKDF}}
+\newcommand{\MAC}{\ensuremath{\mathsf{MAC}}}
+\newcommand{\SIG}{\ensuremath{\mathsf{SIG}}}
+\newcommand{\AENC}{\ensuremath{\mathsf{AE}}}
+\newcommand{\Dec}{\ensuremath{\mathsf{Dec}}}
+\newcommand{\Enc}{\ensuremath{\mathsf{Enc}}}
+\newcommand{\bits}{{\{0,1\}}}
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+
+\begin{document}
+
+\begin{protocol}{2}
+
+\participants{\doesinabox{Client \\ $(NSTM,k_{CS})$}}
+		{\doesinabox{Server \\ $(cert_S, sk_S),k_S$}}
+\protocolline
+
+\doesA{$PSK \leftarrow k_{CS}, r_C \rand \bits^\lambda$}
+\doesA{$[x \rand Z_q, CKS=X\leftarrow g^x]$}
+\doesA{$ext_1 = ([CKS,]MOD_{psk},NSTM,SNI)$}
+\doesA{$CH=(r_C,\vec{cs},ext_1)$}
+
+\AtoB{CH}
+
+\doesA{$H_0 \leftarrow h(CH)$, derive $tk^0_{data}$}
+\doesA{$c_1 \leftarrow \AENC_{tk^0_{data}}(m_1)$}
+
+\AtoB{c_1}
+
+%\protocolline{encrypted: tk^0_{hs}}
+
+%\doesA{}
+%\doesA{}
+
+\doesB{$k_{CS} \leftarrow \Dec_{k_S}(NSTM)$}
+%\doesB{select $k_{CS}$ by $id^{psk}_{CS}$}
+\doesB{$PSK \leftarrow k_{CS}, r_S \rand \bits^\lambda, $}
+\doesB{$[y \rand Z_q, SKS=Y\leftarrow g^y]$}
+\doesB{$ext_2=(NSTM[,SKS])$}
+\doesB{$SH=(r_S,cs,ext_2)$}
+
+\AfromB{SH}
+
+\participants{\doesinabox{$[(EC)DHE \leftarrow Y^x]$ \\ $H_1 \leftarrow h(CH|SH)$ \\  derive $tk_{hs},k_{fin}$}}
+		{\doesinabox{$[(EC)DHE \leftarrow X^y]$ \\ $H_1 \leftarrow h(CH|SH)$\\ derive $tk_{hs},k_{fin}$}}
+
+\protocolline{encrypted: tk_{hs}}
+
+\doesB{$EE=(ext_3)$}
+\doesB{$H_3 \leftarrow h(CH|...|EE)$}
+\doesB{$FS \leftarrow \MAC_{k^S_{fin}}(H_3)$}
+
+\AfromB{EE,FS}
+\AfromB{m_2}
+
+\participants{\doesinabox{$H_4 \leftarrow h(CH|...|FS)$ \\  derive $tk_{data}$}}
+		{\doesinabox{$H_4 \leftarrow h(CH|...|FS)$\\ derive $tk_{data}$}}
+
+
+\doesA{$FC \leftarrow \MAC_{k^C_{fin}}(H_4)$}
+
+\AtoB{FC}
+
+\participants{\doesinabox{$H_5 \leftarrow h(CH|...|FC)$ \\  derive $k_{CS}^{new}$}}
+		{\doesinabox{$H_5 \leftarrow h(CH|...|FC)$\\ derive $k_{CS}^{new}$}}
+
+\doesB{$NSTM'=\Enc_{k_S}(k_{CS}^{new})$}
+
+\protocolline{encrypted: tk_{data} }
+
+\AfromB{NSTM'}
+\AexchangeB{m_3,m_4, ...}
+
+\end{protocol}
+
+\end{document}
