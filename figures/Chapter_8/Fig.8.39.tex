@@ -1,0 +1,87 @@
+\documentclass{standalone}
+\usepackage{protocol}
+
+%---------------IKE abbreviations-----------------
+\newcommand{\ckyi}{\ensuremath{\mathsf{spi_I}}}
+\newcommand{\ckyr}{\ensuremath{\mathsf{spi_R}}}
+
+%-------------cryptographic primitives-----------------
+\newcommand{\PRF}[2]{\mathsf{PRF}_{#1}(#2)}
+\newcommand{\iprf}[2]{\mathsf{IPRF}_{#1}(#2)}
+\newcommand{\MAC}[2]{\mathsf{MAC}_{#1}(#2)}
+\newcommand{\SE}{\mathsf{SE}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\ENC}[2]{\mathsf{Enc}_{#1}(#2)}
+\newcommand{\DEC}[2]{\mathsf{Dec}_{#1}(#2)}
+\newcommand{\Decrypt}{\mathsf{Decrypt}}
+\newcommand{\Encrypt}{\mathsf{Encrypt}}
+\newcommand{\SIGN}{\mathsf{Sign}}
+\newcommand{\Vfy}{\mathsf{Vfy}}
+\newcommand{\Hash}{\mathsf{h}}
+
+%---------------Algo-------------------
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+\newcommand{\bits}{\{0,1\}}
+
+\begin{document}
+
+
+
+\begin{protocol}{2}
+
+\participants{\doesinabox{Initiator \\ $(sk_I,pk_I)$}}
+		{\doesinabox{Responder \\ $(sk_R,pk_R)$}}
+
+%----------------------------------------
+\protocolline
+\subprotocolcaption{{\bf IKE\_SA\_INIT}}
+
+\doesA{$\ckyi \rand \bits^{64}$}
+\doesA{$x \rand \bits^\lambda, X \leftarrow g^x$,}
+\doesA{$n_I \rand \bits^\mu$, $m_1=(\overrightarrow{SA},X,n_I)$}
+\AtoB{\ckyi|0,m_1}
+
+\doesB{$\ckyr \rand \bits^{64}$}
+\doesB{$y \rand \bits^\lambda, Y \leftarrow g^y$}
+\doesB{$n_R \rand \bits^\mu$, $m_2=(SA,Y,n_R,[CREQ])$}
+\AfromB{\ckyi|\ckyr,m_2}
+
+%----------------------------------------
+\protocolline
+\subprotocolcaption{{\bf Key Derivation IKEv2}}
+
+\subprotocolcaption{$s \leftarrow \PRF{n_I|n_R}{g^{xy}}$}
+\subprotocolcaption{$T_1|T_2|T_3|... \leftarrow \iprf{s}{data}$; $T_1 \leftarrow \PRF{s}{data|1}$; $T_{i+1} \leftarrow \PRF{s}{T_i|data|i+1}$}
+\subprotocolcaption{$k_d|k_{ai}|k_{ar}|k_{ei}|k_{er}|k_{pi}|k_{pr} \leftarrow \iprf{s}{n_i|n_r|\ckyi|\ckyr}$}
+
+%----------------------------------------
+\protocolline
+\subprotocolcaption{{\bf IKE\_AUTH}}
+%\subprotocolcaption{All messages encrypted with Encrypt-then-MAC with $(k_{ei},k_{ai})$ ($(k_{er},k_{ar})$, resp.)}
+
+\doesA{$mac_i \leftarrow \PRF{k_{pi}}{ID_I}$}
+\doesA{$\sigma_i \leftarrow \SIGN_{sk_I}(\ckyi|0|m_1|n_R|mac_i)$}
+\doesA{$m_3 = (ID_I,\sigma_i,\overrightarrow{SA_2},\overrightarrow{TS})$}
+\doesA{$c'_3\leftarrow\Enc_{k_{ei}}(m_3)$}
+\doesA{$c_3 = (c'_3,\MAC{k_{ai}}{c'_3})$}
+\AtoB{\ckyi|\ckyr,c_3}
+
+\doesB{$mac_r \leftarrow \PRF{k_{pr}}{ID_R}$}
+\doesB{$\sigma_r \leftarrow \SIGN_{sk_R}(\ckyi|\ckyr|m_2|n_I|mac_r)$}
+\doesB{$m_4 := (ID_R, \sigma_r,SA_2,\overrightarrow{TS})$}
+\doesB{$c'_4\leftarrow\Enc_{k_{er}}(m_4)$}
+\doesB{$c_4 = (c'_3,\MAC{k_{ar}}{c'_4})$}
+\AfromB{\ckyi|\ckyr,c_4}
+
+%----------------------------------------
+\protocolline
+\subprotocolcaption{{\bf Key Derivation ESP/AH}}
+\subprotocolcaption{$k'_{ei}|k'_{ai}|k'_{er}|k'_{ar} \leftarrow \iprf{k_d}{n_i|n_r}$}
+
+
+\end{protocol}
+
+
+
+\end{document}

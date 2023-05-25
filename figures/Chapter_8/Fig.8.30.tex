@@ -1,0 +1,41 @@
+\documentclass{standalone}
+\usepackage{protocol}
+
+%---------------IKE abbreviations-----------------
+\newcommand{\ckyi}{\ensuremath{\mathsf{cky_I}}}
+\newcommand{\ckyr}{\ensuremath{\mathsf{cky_R}}}
+
+\begin{document}
+
+\begin{protocol}{2}
+
+\participants{\doesinabox{Initiator \\ $(sk_I,pk_I)$}}
+		{\doesinabox{Responder \\ $(sk_R,pk_R)$}}
+
+\protocolline
+
+\protocolheader{{\bf Negotiation}}
+\AtoB{\ckyi|0,m_1=(\overrightarrow{SA})}
+\AfromB{\ckyi|\ckyr,m_2=(SA)}
+
+\protocolline
+
+\protocolheader{{\bf Key Agreement/Authentication}}
+\AtoB{\ckyi|\ckyr,m_3=(g^x,n_I, aux_I)}
+\AfromB{\ckyi|\ckyr,m_4=(g^y,n_R,aux_R)}
+
+\protocolline
+
+\protocolheader{{\bf Key Derivation}}
+\doesA{}
+\protocolheader{derive $k,k_0,k_1,k_2$}
+
+\protocolline
+
+\protocolheader{{\bf Encrypted Authentication and Key Confirmation}}
+\AtoB{\ckyi|\ckyr,c_5}
+\AfromB{\ckyi|\ckyr,c_6}
+
+\end{protocol}
+
+\end{document}

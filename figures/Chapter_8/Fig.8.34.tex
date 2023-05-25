@@ -1,0 +1,30 @@
+\documentclass{standalone}
+\usepackage{protocol}
+
+%---------------IKE abbreviations-----------------
+\newcommand{\ckyi}{\ensuremath{\mathsf{cky_I}}}
+\newcommand{\ckyr}{\ensuremath{\mathsf{cky_R}}}
+
+\begin{document}
+
+\begin{protocol}{2}
+
+\participants{\doesinabox{Initiator\\$(sk_I,pk_I)$}}
+		{\doesinabox{Responder\\$(sk_R,pk_R)$}}
+
+\protocolline
+
+%\doesA{$m_1:=(\vec{SA},g^x,data_I)$}
+\AtoB{\ckyi|0,m_1=(\vec{SA},g^x,data_I)}
+
+%\doesB{$m_2:=(SA,g^y,data_R,sig_R)$}
+\doesB{derive $k,k_0,k_1,k_2$}
+\AfromB{\ckyi|\ckyr,m_2=(SA,g^y,data_R,sig_R)}
+
+%\doesA{$m_3:=(sig_I)$}
+\doesA{derive $k,k_0,k_1,k_2$}
+\AtoB{\ckyi|\ckyr,m_3=(sig_I)}
+
+\end{protocol}
+
+\end{document}

@@ -1,0 +1,96 @@
+\documentclass{standalone}
+\usepackage{protocol}
+
+%---------------IKE abbreviations-----------------
+\newcommand{\ckyi}{\ensuremath{\mathsf{cky_I}}}
+\newcommand{\ckyr}{\ensuremath{\mathsf{cky_R}}}
+
+%-------------cryptographic primitives-----------------
+\newcommand{\PRF}[2]{\mathsf{PRF}_{#1}(#2)}
+\newcommand{\iprf}[2]{\mathsf{IPRF}_{#1}(#2)}
+\newcommand{\MAC}[2]{\mathsf{MAC}_{#1}(#2)}
+\newcommand{\SE}{\mathsf{SE}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\ENC}[2]{\mathsf{Enc}_{#1}(#2)}
+\newcommand{\DEC}[2]{\mathsf{Dec}_{#1}(#2)}
+\newcommand{\Decrypt}{\mathsf{Decrypt}}
+\newcommand{\Encrypt}{\mathsf{Encrypt}}
+\newcommand{\SIGN}[2]{\mathsf{Sign}_{#1}({#2})}
+\newcommand{\Vfy}{\mathsf{Vfy}}
+\newcommand{\Hash}{\mathsf{h}}
+\newcommand{\KDF}{\mathsf{KDF}}
+
+%---------------Algo-------------------
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+\newcommand{\bits}{\{0,1\}}
+
+\begin{document}
+
+
+
+\begin{protocol}{2}
+
+\participants{\doesinabox{Initiator $ID_I$\\ $(sk_I,pk_I);pk_R$}}
+		{\doesinabox{Responder $ID_R$\\ $(sk_R,pk_R);pk_I$}}
+
+%----------------------------------------
+\protocolline
+\subprotocolcaption{Cookie Exchange}
+
+\doesA{$\ckyi \rand \bits^{128}$}
+\AtoB{(\ckyi,0)}
+
+\doesB{$\ckyr \rand \bits^{128}$}
+\AfromB{(\ckyi,\ckyr)}
+
+%----------------------------------------
+\protocolline
+\subprotocolcaption{Value Exchange}
+
+\doesA{$x \rand \bits^\lambda, X \leftarrow g^x$}
+\AtoB{(\ckyi,\ckyr,X)}
+
+\doesB{$y \rand \bits^\lambda, Y \leftarrow g^y$}
+\AfromB{(\ckyi,\ckyr,Y)}
+
+%----------------------------------------
+\protocolline
+\subprotocolcaption{Identification Exchange}
+
+\doesA{$\sigma_I \leftarrow \SIGN{sk_I}{\ckyi|\ckyr|X|Y|ID_I}$}
+\doesA{$k_p \leftarrow \KDF(g^{xy},privacy)$}
+\doesA{$c_I \leftarrow \ENC{k_p}{ID_I,\sigma_I}$}
+\AtoB{(\ckyi,\ckyr,c_I)}
+
+
+\doesB{$\sigma_R \leftarrow \SIGN{sk_R}{\ckyi|\ckyr|Y|X|ID_R}$}
+\doesB{$k_p \leftarrow \KDF(g^{xy},privacy)$}
+\doesB{$c_R \leftarrow \ENC{k_p}{ID_R\sigma_R}$}
+\AfromB{(\ckyi,\ckyr,c_R)}
+
+%----------------------------------------
+\protocolline
+\subprotocolcaption{SPI Exchange (multiple times)}
+
+\doesA{Select $D_{SPI}$}
+\doesA{$k_{M} \leftarrow \KDF(g^{xy},D_{SPI}|\ell_{M})$}
+\doesA{$mac \leftarrow \MAC{k_{M}}{D_{SPI}|ID_I}$}
+\doesA{$k_{E} \leftarrow \KDF(g^{xy},D_{SPI}|\ell_{E})$}
+\doesA{$c_I \leftarrow \ENC{k_{E}}{mac}$}
+
+\AtoB{(\ckyi,\ckyr, D_{SPI}, c_I)}
+
+
+\doesB{Derive $k_M,k_E$}
+\doesB{$mac' \leftarrow \MAC{k_{M}}{D_{SPI}|ID_R}$}
+\doesB{$c_R \leftarrow \ENC{k_{E}}{mac'}$} 
+
+\AfromB{(\ckyi,\ckyr,c_R)}
+
+%\doesA{$k_s \leftarrow \KDF(g^{xy},SPI)$}
+\end{protocol}
+
+
+
+\end{document}

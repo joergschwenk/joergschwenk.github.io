@@ -1,0 +1,80 @@
+\documentclass{standalone}
+\usepackage{protocol}
+
+%---------------IKE abbreviations-----------------
+\newcommand{\ckyi}{\ensuremath{\mathsf{cky_I}}}
+\newcommand{\ckyr}{\ensuremath{\mathsf{cky_R}}}
+
+%-------------cryptographic primitives-----------------
+\newcommand{\PRF}[2]{\mathsf{PRF}_{#1}(#2)}
+\newcommand{\iprf}[2]{\mathsf{IPRF}_{#1}(#2)}
+\newcommand{\MAC}[2]{\mathsf{MAC}_{#1}(#2)}
+\newcommand{\SE}{\mathsf{SE}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\ENC}[2]{\mathsf{Enc}_{#1}(#2)}
+\newcommand{\DEC}[2]{\mathsf{Dec}_{#1}(#2)}
+\newcommand{\Decrypt}{\mathsf{Decrypt}}
+\newcommand{\Encrypt}{\mathsf{Encrypt}}
+\newcommand{\SIGN}[2]{\mathsf{Sign}_{#1}({#2})}
+\newcommand{\Vfy}{\mathsf{Vfy}}
+\newcommand{\Hash}{\mathsf{h}}
+\newcommand{\KDF}{\mathsf{KDF}}
+
+
+%---------------Algo-------------------
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+\newcommand{\bits}{\{0,1\}}
+
+\begin{document}
+
+
+
+\begin{protocol}{2}
+
+\participants{\doesinabox{Initiator $ID_I$\\ $(sk_I,pk_I);pk_R$}}
+		{\doesinabox{Responder $ID_R$\\ $(sk_R,pk_R);pk_I$}}
+
+%----------------------------------------
+\protocolline
+\subprotocolcaption{SHARE}
+
+\doesA{$k_I \rand \bits^\nu$}
+\doesA{$c_I \leftarrow \ENC{pk_R}{ID_I,k_I}$}
+\AtoB{c_I}
+
+\doesB{$k_R \rand \bits^\nu$}
+\doesB{$c_R \leftarrow \ENC{pk_I}{k_R}$}
+\doesB{$k_{mac} \leftarrow \Hash(k_I|k_R)$}
+\AfromB{c_R}
+
+\doesA{$k_{mac} \leftarrow \Hash(k_I|k_R)$}
+%----------------------------------------
+\protocolline
+\subprotocolcaption{EXCH}
+
+\doesA{$x \rand \bits^\lambda, X \leftarrow g^x$}
+\AtoB{X}
+
+\doesB{$y \rand \bits^\lambda, Y \leftarrow g^y$}
+\AfromB{Y}
+
+%----------------------------------------
+\protocolline
+\subprotocolcaption{AUTH}
+
+\doesA{$mac_I \leftarrow \MAC{k_{mac}}{Y|X|ID_I|ID_R}$}
+\AtoB{mac_I}
+
+\doesB{$mac_R \leftarrow \MAC{k_{mac}}{X|Y|ID_R|ID_I}$}
+\AfromB{mac_R}
+
+\doesB{$k_{sess} \leftarrow \Hash(g^{xy})$}
+\doesA{$k_{sess} \leftarrow \Hash(g^{xy})$}
+%----------------------------------------
+
+\end{protocol}
+
+
+
+\end{document}

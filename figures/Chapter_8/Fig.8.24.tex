@@ -1,0 +1,84 @@
+\documentclass{standalone}
+\usepackage{protocol}
+
+%---------------IKE abbreviations-----------------
+\newcommand{\ckyi}{\ensuremath{\mathsf{cky_I}}}
+\newcommand{\ckyr}{\ensuremath{\mathsf{cky_R}}}
+
+%-------------cryptographic primitives-----------------
+\newcommand{\PRF}[2]{\mathsf{PRF}_{#1}(#2)}
+\newcommand{\iprf}[2]{\mathsf{IPRF}_{#1}(#2)}
+\newcommand{\MAC}[2]{\mathsf{MAC}_{#1}(#2)}
+\newcommand{\SE}{\mathsf{SE}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\ENC}[2]{\mathsf{Enc}_{#1}(#2)}
+\newcommand{\DEC}[2]{\mathsf{Dec}_{#1}(#2)}
+\newcommand{\Decrypt}{\mathsf{Decrypt}}
+\newcommand{\Encrypt}{\mathsf{Encrypt}}
+\newcommand{\SIGN}[2]{\mathsf{Sign}_{#1}({#2})}
+\newcommand{\Vfy}{\mathsf{Vfy}}
+\newcommand{\Hash}{\mathsf{h}}
+\newcommand{\KDF}{\mathsf{KDF}}
+
+%---------------Algo-------------------
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+\newcommand{\bits}{\{0,1\}}
+
+\begin{document}
+
+
+
+\begin{protocol}{2}
+
+\participants{\doesinabox{Initiator $ID_I$\\ $(sk_I,pk_I);pk_R$}}
+		{\doesinabox{Responder $ID_R$\\ $(sk_R,pk_R);pk_I$}}
+
+%----------------------------------------
+\protocolline
+
+\AtoB{(0|0)}
+
+\doesB{$\ckyr \rand \bits^{64}$}
+\AfromB{0|\ckyr}
+
+\doesA{$\ckyi \rand \bits^{64}$}
+\doesA{$x \rand \bits^\lambda, X \leftarrow g^x$}
+\AtoB{(\ckyi|\ckyr,X,\overrightarrow{opt})}
+
+\doesB{$y \rand \bits^\lambda, Y \leftarrow g^y$}
+\AfromB{(\ckyr|\ckyi,Y, opt)}
+
+\doesA{$n_I \rand \bits^\nu$}
+\doesA{$C_I \leftarrow \ENC{pk_R}{n_I}$}
+%\doesA{$\sigma_I \leftarrow \SIGN{sk_I}{\ckyi|\ckyr|X|Y|ID_I}$}
+\doesA{$k_p \leftarrow \KDF(0,g^{xy})$}
+\doesA{$c_I \leftarrow \ENC{k_p}{ID_I,ID_R,C_I}$}
+\AtoB{(\ckyi|\ckyr,X,c_I)}
+
+\doesB{$n_R \rand \bits^\nu$}
+\doesB{$C_R \leftarrow \ENC{pk_I}{n_R,n_I}$}
+%\doesB{$\sigma_R \leftarrow \SIGN{sk_R}{\ckyi|\ckyr|Y|X|ID_R}$}
+\doesB{$k_p \leftarrow \KDF(0,g^{xy})$}
+\doesB{$k_{mac} \leftarrow \KDF(0,n_I|n_R)$}
+\doesB{$trans_R \leftarrow (ID_R,ID_I,Y,X,opt)$}
+\doesB{$mac_R \leftarrow \MAC{k_{mac}}{trans_R}$}
+\doesB{$c_R \leftarrow \ENC{k_p}{C_R,ID_R,ID_I,mac_R}$}
+\AfromB{(\ckyr|\ckyi,c_R)}
+
+\doesA{$k_{mac} \leftarrow \KDF(0,n_I|n_R)$}
+\doesA{$trans_I \leftarrow (ID_I,ID_R,X,Y,opt)$}
+\doesA{$mac_I \leftarrow \MAC{k_{mac}}{trans_I}$}
+\doesA{$c_I \leftarrow \ENC{k_p}{mac_I}$}
+%\doesA{$\sigma'_I \leftarrow \SIGN{sk_I}{\ckyi|\ckyr|Req}$}
+\AtoB{(\ckyi|\ckyr,c_I)}
+
+
+\doesA{$k_{spi} \leftarrow \KDF(n_I|n_R,g^{xy}|\ckyi|\ckyr)$}
+\doesB{$k_{spi} \leftarrow \KDF(n_I|n_R,g^{xy}|\ckyi|\ckyr)$}
+
+\end{protocol}
+
+
+
+\end{document}

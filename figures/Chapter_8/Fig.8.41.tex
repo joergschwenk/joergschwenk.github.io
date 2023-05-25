@@ -1,0 +1,63 @@
+\documentclass{standalone}
+\usepackage{protocol}
+
+%---------------IKE abbreviations-----------------
+\newcommand{\ckyi}{\ensuremath{\mathsf{spi_I}}}
+\newcommand{\ckyr}{\ensuremath{\mathsf{spi_R}}}
+
+%-------------cryptographic primitives-----------------
+\newcommand{\PRF}[2]{\mathsf{PRF}_{#1}(#2)}
+\newcommand{\iprf}[2]{\mathsf{IPRF}_{#1}(#2)}
+\newcommand{\MAC}[2]{\mathsf{MAC}_{#1}(#2)}
+\newcommand{\SE}{\mathsf{SE}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\ENC}[2]{\mathsf{Enc}_{#1}(#2)}
+\newcommand{\DEC}[2]{\mathsf{Dec}_{#1}(#2)}
+\newcommand{\Decrypt}{\mathsf{Decrypt}}
+\newcommand{\Encrypt}{\mathsf{Encrypt}}
+\newcommand{\SIGN}{\mathsf{Sign}}
+\newcommand{\Vfy}{\mathsf{Vfy}}
+\newcommand{\Hash}{\mathsf{h}}
+
+%---------------Algo-------------------
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+\newcommand{\bits}{\{0,1\}}
+
+\begin{document}
+
+
+
+\begin{protocol}{2}
+
+\participants{\doesinabox{Initiator \\ $(sk_I,pk_I)$ \\ $(k_d, k_{ei}, k_{ai}, k_{er}, k_{ar})$ \\ $(\ckyi,\ckyr)$}}
+		{\doesinabox{Responder \\ $(sk_R,pk_R)$ \\ $(k_d, k_{ei}, k_{ai}, k_{er}, k_{ar})$ \\ $(\ckyi,\ckyr)$}}
+
+\protocolline
+\subprotocolcaption{{\bf CREATE\_CHILD}}
+%\subprotocolcaption{All messages encrypted with Encrypt-then-MAC with $(k_{ei},k_{ai})$ ($(k_{er},k_{ar})$, resp.)}
+
+
+\doesA{[$x' \rand \bits^\lambda, X' \leftarrow g^{x'}$]}
+\doesA{$n'_I \rand \bits^\mu$, $m'_1=(\vec{SA},n_I,[X'])$}
+\doesA{$c'_1\leftarrow\Enc_{k_{ei}}(m'_1)$}
+\doesA{$c_1 = (c'_1,\MAC{k_{ai}}{c'_1})$}
+\AtoB{\ckyi|\ckyr,c_1}
+
+\doesB{[$y' \rand \bits^\lambda, Y' \leftarrow g^{y'}$]}
+\doesB{$n'_R \rand \bits^\mu$, $m'_2=(SA,n'_R,[Y'])$}
+\doesB{$c'_2\leftarrow\Enc_{k_{er}}(m'_2)$}
+\doesB{$c_2 = (c'_2,\MAC{k_{ar}}{c'_2})$}
+\AfromB{\ckyi|\ckyr,c_2}
+
+
+%----------------------------------------
+\protocolline
+\subprotocolcaption{{\bf Key Derivation}}
+\subprotocolcaption{$k'_{ei}|k'_{ai}|k'_{er}|k'_{ar} \leftarrow \iprf{k_d}{[g^{x'y'}]|n'_I|n'_R}$}
+
+\end{protocol}
+
+
+
+\end{document}

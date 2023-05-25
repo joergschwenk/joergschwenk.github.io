@@ -1,0 +1,66 @@
+\documentclass{standalone}
+\usepackage{protocol}
+
+%---------------IKE abbreviations-----------------
+\newcommand{\ckyi}{\ensuremath{\mathsf{cky_I}}}
+\newcommand{\ckyr}{\ensuremath{\mathsf{cky_R}}}
+
+%-------------cryptographic primitives-----------------
+\newcommand{\PRF}[2]{\mathsf{PRF}_{#1}(#2)}
+\newcommand{\MAC}[2]{\mathsf{MAC}_{#1}(#2)}
+\newcommand{\SE}{\mathsf{SE}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\ENC}[2]{\mathsf{Enc}_{#1}(#2)}
+\newcommand{\DEC}[2]{\mathsf{Dec}_{#1}(#2)}
+\newcommand{\Decrypt}{\mathsf{Decrypt}}
+\newcommand{\Encrypt}{\mathsf{Encrypt}}
+\newcommand{\SIGN}{\mathsf{Sign}}
+\newcommand{\Vfy}{\mathsf{Vfy}}
+\newcommand{\Hash}{\mathsf{h}}
+
+\begin{document}
+
+\begin{protocol}{2}
+%\protocolheader{$\mathcal{PS}$ protocol}\\
+
+
+\participants{\doesinabox{Initiator \\ $(sk_I,pk_I)$\\$(k_0,k_1,k_2)$, $(\ckyi|\ckyr)$}}
+		{\doesinabox{Responder \\ $(sk_R,pk_R)$\\$(k_0,k_1,k_2)$, $(\ckyi|\ckyr)$}}
+
+\protocolline
+
+%\protocolheader{$(\ckyi|\ckyr)$ from Phase 1}
+
+\doesA{}
+%\doesA{choose $n'_I$}
+%\doesA{$ID_M$ from ISAKMP Header}
+%\doesA{$mac'_1:=\MAC{k_1}{ID_M,\vec{SA'},n'_I}$}
+%\doesA{$c_3:=\ENC{k_2}{mac'_1,\vec{SA'},n'_I,g^{x'}}$}
+
+\AtoB{\ckyi|\ckyr,c_1=\ENC{k_2}{mac'_1,\overrightarrow{SA'},n'_I[,g^{x'}]}}
+
+%\doesB{choose $n'_R$}
+%\doesB{$mac'_2:=\MAC{k_1}{ID_M,n'_I,SA',n'_R}$}
+%\doesB{$c_4:=\ENC{k_2}{mac'_2,SA',n'_R,g^{y'}}$}
+
+\AfromB{\ckyi|\ckyr,c_2=\ENC{k_2}{mac'_2,SA',n'_R[,g^{y'}]}}
+
+%\doesA{$mac'_3:=\MAC{k_1}{0,ID_M,n'_I,n'_R}$}
+%\doesA{$c_5:=\ENC{k_2}{mac'_3}$}
+
+\AtoB{\ckyi|\ckyr,c_3=\ENC{k_2}{mac'_3}}
+
+%\doesA{$prot$ from ISAKMP header}
+%\doesA{$SPI$ from ISAKMP header}
+%\doesA{$k_{SPI}:=\PRF{k_0}{g^{x'y'},prot,SPI,n'_I,n'_R}$}
+%
+%\doesB{$prot$ from ISAKMP header}
+%\doesB{$SPI$ from ISAKMP header}
+%\doesB{$k_{SPI}:=\PRF{k_0}{g^{x'y'},prot,SPI,n'_I,n'_R}$}
+
+\protocolheader{derive $k_{SPI}$}
+
+\end{protocol}
+
+\end{document}

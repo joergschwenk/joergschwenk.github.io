@@ -1,0 +1,69 @@
+\documentclass{standalone}
+\usepackage{../protocol}
+%\usepackage{bm}
+
+%---------------IKE abbreviations-----------------
+\newcommand{\ckyi}{\ensuremath{\mathsf{cki_I}}}
+\newcommand{\ckyr}{\ensuremath{\mathsf{cki_R}}}
+
+%-------------cryptographic primitives-----------------
+\newcommand{\PRF}[2]{\mathsf{PRF}_{#1}(#2)}
+\newcommand{\iprf}[2]{\mathsf{IPRF}_{#1}(#2)}
+\newcommand{\MAC}[2]{\mathsf{MAC}_{#1}(#2)}
+\newcommand{\SE}{\mathsf{SE}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\ENC}[2]{\mathsf{Enc}_{#1}(#2)}
+\newcommand{\DEC}[2]{\mathsf{Dec}_{#1}(#2)}
+\newcommand{\Decrypt}{\mathsf{Decrypt}}
+\newcommand{\Encrypt}{\mathsf{Encrypt}}
+\newcommand{\SIGN}{\mathsf{Sign}}
+\newcommand{\Vfy}{\mathsf{Vfy}}
+\newcommand{\Hash}{\mathsf{h}}
+
+%---------------Algo-------------------
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+\newcommand{\bits}{\{0,1\}}
+
+
+\begin{document}
+
+\begin{protocol}{2}
+
+\participants{\doesinabox{Initiator \\ $psk_{IR}$}}
+             {\doesinabox{Responder \\ $psk_{IR}$}}
+
+\protocolline
+
+\doesA{$m_1=(\vec{SA})$}
+\AtoB{\ckyi|0,m_1}
+
+\doesB{$m_2=(SA)$}
+\AfromB{\ckyi|\ckyr,m_2}
+
+\doesA{$m_3=(g^x,n_I)$}
+\AtoB{\ckyi|\ckyr,m_3}
+
+\doesB{$m_4=(g^y,n_R)$}
+\doesB{$k:=\PRF{psk_{IR}}{n_I,n_R}$}
+\doesB{derive $k_0$, $k_1$, $k_2$}
+\AfromB{\ckyi|\ckyr,m_4}
+
+
+\doesA{$k:=\PRF{psk_{IR}}{n_I,n_R}$}
+\doesA{derive $k_0$, $k_1$, $k_2$}
+
+\doesA{$prf_I \leftarrow \PRF{k}{g^x,g^y,\ckyi,\ckyr,SA,ID_I}$}
+\doesA{$c_5 \leftarrow \ENC{k_2}{ID_I,prf_I}$}
+\AtoB{\ckyi|\ckyr,c_5}
+
+\doesB{$prf_R \leftarrow \PRF{k}{g^y,g^x,\ckyr,\ckyi,SA,ID_R}$}
+\doesB{$c_6 \leftarrow \ENC{k_2}{ID_R,prf_R}$}
+\AfromB{\ckyi|\ckyr,c_6}
+
+%\participants{\doesinabox{\textbf{Compute $\mathsf{MAC}_R$ and \\ compare to $m_6$}}}
+%             {\doesinabox{\textbf{Compute $\mathsf{MAC}_I$ and \\ compare to $m_5$}}}
+
+\end{protocol}
+
+\end{document}

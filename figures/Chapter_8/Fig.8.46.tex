@@ -1,0 +1,70 @@
+\documentclass{standalone}
+\usepackage{../protocol}
+\usepackage{bm}
+
+%---------------IKE abbreviations-----------------
+\newcommand{\ckyi}{\ensuremath{\mathsf{cki_I}}}
+\newcommand{\ckyr}{\ensuremath{\mathsf{cki_R}}}
+
+%-------------cryptographic primitives-----------------
+\newcommand{\PRF}[2]{\mathsf{PRF}_{#1}(#2)}
+\newcommand{\iprf}[2]{\mathsf{IPRF}_{#1}(#2)}
+\newcommand{\MAC}[2]{\mathsf{MAC}_{#1}(#2)}
+\newcommand{\SE}{\mathsf{SE}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\ENC}[2]{\mathsf{Enc}_{#1}(#2)}
+\newcommand{\DEC}[2]{\mathsf{Dec}_{#1}(#2)}
+\newcommand{\Decrypt}{\mathsf{Decrypt}}
+\newcommand{\Encrypt}{\mathsf{Encrypt}}
+\newcommand{\SIGN}{\mathsf{Sign}}
+\newcommand{\Vfy}{\mathsf{Vfy}}
+\newcommand{\Hash}{\mathsf{h}}
+
+%---------------Algo-------------------
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+\newcommand{\bits}{\{0,1\}}
+
+
+\begin{document}
+
+\begin{protocol}{2}
+
+\participants{\doesinabox{Initiator \\ $(ID_I, sk_I, \bm{pk_I})$}}
+             {\doesinabox{Responder \\ $(ID_R, sk_R, \bm{pk_R})$}}
+
+\protocolline
+
+\doesA{$m_1=(proposals)$}
+\AtoB{\ckyi|0,m_1}
+
+\doesB{$m_2=(proposal)$}
+\AfromB{\ckyi|\ckyr,m_2}
+
+\doesA{$\bm{c_{n_I} \leftarrow \ENC{pk_R}{n_I}}$}
+\doesA{$\bm{c_{id_I} \leftarrow \ENC{pk_R}{ID_I}}$}
+\doesA{$\bm{m_3=(g^x,c_{id_I},c_{n_I})}$}
+\AtoB{\ckyi|\ckyr,m_3}
+
+\doesB{$\bm{c_{n_R} \leftarrow \ENC{pk_I}{n_R}}$}
+\doesB{$\bm{c_{id_R} \leftarrow \ENC{pk_I}{ID_R}}$}
+\doesB{$\bm{m_4=(g^y,c_{id_R},c_{n_R})}$}
+\AfromB{\ckyi|\ckyr,m_4}
+
+\participants{\doesinabox{$\bm{k \leftarrow \PRF{\Hash(n_I,n_R)}{\ckyi , \ckyr}}$ \\ derive $k_d$, $k_a$, $k_e$ from $k$}}
+             {\doesinabox{$\bm{k \leftarrow \PRF{\Hash(n_I,n_R)}{\ckyi , \ckyr}}$ \\ derive $k_d$, $k_a$, $k_e$ from $k$}}
+
+\doesA{Compute $\mathsf{MAC}_I$ using $k$}
+\doesA{$\bm{c_5 \leftarrow \ENC{k_e}{\mathsf{MAC}_I}}$}
+\AtoB{\ckyi|\ckyr,c_5}
+
+\doesB{Compute $\mathsf{MAC}_R$ using $k$}
+\doesB{$\bm{c_6 \leftarrow \ENC{k_e}{\mathsf{MAC}_R}}$}
+\AfromB{\ckyi|\ckyr,c_6}
+
+\participants{\doesinabox{\textbf{Compute $\bm{\mathsf{MAC}_R}$ and \linebreak compare to $\bm{m_6}$}}}
+             {\doesinabox{\textbf{Compute $\bm{\mathsf{MAC}_I}$ and \linebreak compare to $\bm{m_5}$}}}
+
+\end{protocol}
+
+\end{document}

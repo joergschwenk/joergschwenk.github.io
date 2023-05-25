@@ -1,0 +1,76 @@
+\documentclass{standalone}
+\usepackage{protocol}
+
+%---------------IKE abbreviations-----------------
+\newcommand{\ckyi}{\ensuremath{\mathsf{cky_I}}}
+\newcommand{\ckyr}{\ensuremath{\mathsf{cky_R}}}
+
+%-------------cryptographic primitives-----------------
+\newcommand{\PRF}[2]{\mathsf{PRF}_{#1}(#2)}
+\newcommand{\iprf}[2]{\mathsf{IPRF}_{#1}(#2)}
+\newcommand{\MAC}[2]{\mathsf{MAC}_{#1}(#2)}
+\newcommand{\SE}{\mathsf{SE}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\ENC}[2]{\mathsf{Enc}_{#1}(#2)}
+\newcommand{\DEC}[2]{\mathsf{Dec}_{#1}(#2)}
+\newcommand{\Decrypt}{\mathsf{Decrypt}}
+\newcommand{\Encrypt}{\mathsf{Encrypt}}
+\newcommand{\SIGN}[2]{\mathsf{Sign}_{#1}({#2})}
+\newcommand{\Vfy}{\mathsf{Vfy}}
+\newcommand{\Hash}{\mathsf{h}}
+\newcommand{\KDF}{\mathsf{KDF}}
+
+%---------------Algo-------------------
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+\newcommand{\bits}{\{0,1\}}
+
+\begin{document}
+
+
+
+\begin{protocol}{2}
+
+\participants{\doesinabox{Initiator $ID_I$\\ $(sk_I,pk_I);pk_R$}}
+		{\doesinabox{Responder $ID_R$\\ $(sk_R,pk_R);pk_I$}}
+
+%----------------------------------------
+\protocolline
+
+
+
+
+
+
+\doesA{$\ckyi \rand \bits^{64}$}
+\doesA{$n_I \rand \bits^\nu$}
+\doesA{$x \rand \bits^\lambda, X \leftarrow g^x$}
+\doesA{$m_1 \leftarrow (X,\vec{opt},ID_I,ID_R,n_I,0)$}
+\doesA{$trans_1 \leftarrow (ID_I|ID_R|n_I|0|X|0|\vec{opt})$}
+\doesA{$\sigma_1 \leftarrow \SIGN{sk_I}{trans_1}$}
+\doesA{$m'_1 \leftarrow (m_1,\sigma_1)$}
+\AtoB{(\ckyi|0,m'_1)}
+
+
+\doesB{$\ckyr \rand \bits^{64}$}
+\doesB{$n_R \rand \bits^\nu$}
+\doesB{$y \rand \bits^\lambda, Y \leftarrow g^y$}
+\doesB{$m_2 \leftarrow (Y,opt,ID_R,ID_I,n_R,n_I)$}
+\doesB{$trans_2 \leftarrow (ID_R|ID_I|n_R|n_I|Y|X|opt)$}
+\doesB{$\sigma_2 \leftarrow \SIGN{sk_R}{trans_2}$}
+\doesB{$m'_2 \leftarrow (m_2,\sigma_2)$}
+\AfromB{(\ckyi|\ckyr,m'_2)}
+
+\doesA{$m_3 \leftarrow (X,opt,ID_I,ID_R,n_I,n_R)$}
+\doesA{$trans_3 \leftarrow (ID_I|ID_R|n_I|n_R|X|Y|opt)$}
+\doesA{$\sigma_3 \leftarrow \SIGN{sk_I}{trans_3}$}
+\doesA{$m'_3 \leftarrow (m_3,\sigma_3)$}
+\AtoB{(\ckyi|\ckyr,m'_3)}
+
+\doesA{$k_{spi} \leftarrow \KDF(n_I|n_R,g^{xy}|\ckyi|\ckyr)$}
+\doesB{$k_{spi} \leftarrow \KDF(n_I|n_R,g^{xy}|\ckyi|\ckyr)$}
+\end{protocol}
+
+
+
+\end{document}

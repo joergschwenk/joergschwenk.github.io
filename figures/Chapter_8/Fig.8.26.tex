@@ -1,0 +1,61 @@
+\documentclass{standalone}
+\usepackage{protocol}
+
+%---------------IKE abbreviations-----------------
+\newcommand{\ckyi}{\ensuremath{\mathsf{cky_I}}}
+\newcommand{\ckyr}{\ensuremath{\mathsf{cky_R}}}
+
+%-------------cryptographic primitives-----------------
+\newcommand{\PRF}[2]{\mathsf{PRF}_{#1}(#2)}
+\newcommand{\iprf}[2]{\mathsf{IPRF}_{#1}(#2)}
+\newcommand{\MAC}[2]{\mathsf{MAC}_{#1}(#2)}
+\newcommand{\SE}{\mathsf{SE}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\ENC}[2]{\mathsf{Enc}_{#1}(#2)}
+\newcommand{\DEC}[2]{\mathsf{Dec}_{#1}(#2)}
+\newcommand{\Decrypt}{\mathsf{Decrypt}}
+\newcommand{\Encrypt}{\mathsf{Encrypt}}
+\newcommand{\SIGN}[2]{\mathsf{Sign}_{#1}({#2})}
+\newcommand{\Vfy}{\mathsf{Vfy}}
+\newcommand{\Hash}{\mathsf{h}}
+\newcommand{\KDF}{\mathsf{KDF}}
+
+%---------------Algo-------------------
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+\newcommand{\bits}{\{0,1\}}
+
+\begin{document}
+
+
+
+\begin{protocol}{2}
+
+\participants{\doesinabox{Initiator $ID_I$\\ $k_{IR};\ckyi|\ckyr$}}
+		{\doesinabox{Responder $ID_R$\\ $k_{IR};\ckyi|\ckyr$}}
+
+%----------------------------------------
+\protocolline
+
+\doesA{$n'_I \rand \bits^{64}$}
+\doesA{$mac_I \leftarrow \MAC{k_{IR}}{n'_I}$}
+\doesA{$m_1 \leftarrow (n'_I,mac_I)$}
+\AtoB{(\ckyi|\ckyr,m_1)}
+
+\doesB{$n'_R \rand \bits^{64}$}
+\doesB{$mac_R \leftarrow \MAC{k_{IR}}{1|n'_R|n'_I}$}
+\doesB{$m_2 \leftarrow (n'_R,mac_R)$}
+\AfromB{(\ckyi|\ckyr,m_2)}
+
+\doesA{$mac'_I \leftarrow \MAC{k_{IR}}{0|n'_I|n'_R}$}
+\doesA{$m_3 \leftarrow (0,mac'_I)$}
+\AtoB{(\ckyi|\ckyr,m_3)}
+
+\doesA{$k_{spi} \leftarrow \PRF{k_{IR}}{n'_I|n'_R}$}
+\doesB{$k_{spi} \leftarrow \PRF{k_{IR}}{n'_I|n'_R}$}
+
+\end{protocol}
+
+
+
+\end{document}

@@ -1,0 +1,61 @@
+\documentclass{standalone}
+\usepackage{protocol}
+
+%---------------IKE abbreviations-----------------
+\newcommand{\ckyi}{\ensuremath{\mathsf{spi_I}}}
+\newcommand{\ckyr}{\ensuremath{\mathsf{spi_R}}}
+
+%-------------cryptographic primitives-----------------
+\newcommand{\PRF}[2]{\mathsf{PRF}_{#1}(#2)}
+\newcommand{\iprf}[2]{\mathsf{IPRF}_{#1}(#2)}
+\newcommand{\MAC}[2]{\mathsf{MAC}_{#1}(#2)}
+\newcommand{\SE}{\mathsf{SE}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\ENC}[2]{\mathsf{Enc}_{#1}(#2)}
+\newcommand{\DEC}[2]{\mathsf{Dec}_{#1}(#2)}
+\newcommand{\Decrypt}{\mathsf{Decrypt}}
+\newcommand{\Encrypt}{\mathsf{Encrypt}}
+\newcommand{\SIGN}[2]{\mathsf{Sign}_{#1}({#2})}
+\newcommand{\Vfy}{\mathsf{Vfy}}
+\newcommand{\Hash}{\mathsf{h}}
+\newcommand{\KDF}{\mathsf{KDF}}
+
+%---------------Algo-------------------
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+\newcommand{\bits}{\{0,1\}}
+
+\begin{document}
+
+
+
+\begin{protocol}{2}
+
+\participants{\doesinabox{Initiator \\ $(sk_I,pk_I);pk_R$}}
+		{\doesinabox{Responder \\ $(sk_R,pk_R);pk_I$}}
+
+%----------------------------------------
+\protocolline
+
+\doesA{$x \rand \bits^\lambda, X \leftarrow g^x$}
+\AtoB{X}
+
+\doesB{$y \rand \bits^\lambda, Y \leftarrow g^y$}
+\doesB{$\sigma_R \leftarrow \SIGN{sk_R}{\Hash(Y|X)}$}
+\doesB{$k \leftarrow \KDF(g^{xy})$}
+\doesB{$c_R \leftarrow \ENC{k}{\sigma_R}$}
+\AfromB{Y,c_R}
+
+
+\doesA{$\sigma_I \leftarrow \SIGN{sk_I}{\Hash(X|Y)}$}
+\doesA{$k \leftarrow \KDF(g^{xy})$}
+\doesA{$c_I \leftarrow \ENC{k}{\sigma_I}$}
+\AtoB{c_I}
+
+
+
+\end{protocol}
+
+
+
+\end{document}
