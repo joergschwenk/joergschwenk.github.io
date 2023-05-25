@@ -1,0 +1,87 @@
+\documentclass{standalone}
+\usepackage{protocol}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+
+%---------------IKE abbreviations-----------------
+\newcommand{\ckyi}{\ensuremath{\mathsf{SPI_I}}}
+\newcommand{\ckyr}{\ensuremath{\mathsf{SPI_R}}}
+
+%-------------cryptographic primitives-----------------
+\newcommand{\PRF}[2]{\mathsf{PRF}_{#1}(#2)}
+\newcommand{\iprf}[2]{\mathsf{IPRF}_{#1}(#2)}
+\newcommand{\MAC}[2]{\mathsf{MAC}_{#1}(#2)}
+\newcommand{\SE}{\mathsf{SE}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\ENC}[2]{\mathsf{Enc}_{#1}(#2)}
+\newcommand{\DEC}[2]{\mathsf{Dec}_{#1}(#2)}
+\newcommand{\Decrypt}{\mathsf{Decrypt}}
+\newcommand{\Encrypt}{\mathsf{Encrypt}}
+\newcommand{\SIGN}{\mathsf{Sign}}
+\newcommand{\Vfy}{\mathsf{Vfy}}
+\newcommand{\Hash}{\mathsf{h}}
+\newcommand{\PKE}{\mathsf{PK.Enc}}
+\newcommand{\PKD}{\mathsf{PK.Dec}}
+
+
+%---------------Algo-------------------
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+\newcommand{\bits}{\{0,1\}}
+
+\begin{document}
+
+
+
+\begin{protocol}{2}
+
+\participants{\doesinabox{Client $C$\\ $[(sk_C,pk_C,cert_C)]$\\$(SID,ms)$}}
+		{\doesinabox{Server $S$\\ $(sk_S,pk_S,cert_S)$\\$(SID,ms)$}}
+
+%----------------------------------------
+\protocolline
+%\subprotocolcaption{{\bf IKE\_SA\_INIT}}
+
+\doesA{$r_C \rand \bits^{224}$}
+%\doesA{$t_C \leftarrow getTime()[32]$}
+%\doesA{$r_C \leftarrow t_C||r'_C$}
+\doesA{$CH \leftarrow (3.3,r_C,SID,\vec{cs},\vec{cm})$}
+\AtoB{CH}
+
+\doesB{$r_S \rand \bits^{224}$}
+%\doesB{$t_S \leftarrow getTime()[32]$}
+%\doesB{$r_S \leftarrow t_S||r'_S$}
+\doesB{Select $cs$ from $\vec{cs}$}
+\doesB{Select $cm$ from $\vec{cm}$}
+\doesB{Check if $SID$ is in database}
+\doesB{$SH \leftarrow (3.3,r_S,SID,cs,cm)$}
+
+\AfromB{SH}
+
+\doesB{Retrieve $ms$ from database}
+\doesB{$k_{enc}^{CS},k_{enc}^{SC},k_{mac}^{CS},k_{mac}^{SC} \leftarrow \PRF{ms}{l_2,r_C,r_S}$}
+\doesB{$FIN_S \leftarrow \PRF{ms}{l_4,\Hash(CH,SH)}$}
+
+\AfromB{CCS}
+\AfromB{\ENC{k_{enc}^{SC}}{FIN_C,\MAC{k_{mac}^{SC}}{FIN_S},pad}}
+
+\doesA{Retrieve $ms$ from database}
+\doesA{$k_{enc}^{CS},k_{enc}^{SC},k_{mac}^{CS},k_{mac}^{SC} \leftarrow \PRF{ms}{l_2,r_C,r_S}$}
+\doesA{$FIN_C \leftarrow \PRF{ms}{l_3,\Hash(CH,SH,FIN_S)}$}
+
+\AtoB{CCS}
+\AtoB{\ENC{k_{enc}^{CS}}{FIN_C,\MAC{k_{mac}^{CS}}{FIN_C},pad}}
+
+
+
+
+
+
+
+
+
+\end{protocol}
+
+
+
+\end{document}

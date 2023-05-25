@@ -1,0 +1,109 @@
+\documentclass{standalone}
+\usepackage{protocol}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+
+%---------------IKE abbreviations-----------------
+\newcommand{\ckyi}{\ensuremath{\mathsf{SPI_I}}}
+\newcommand{\ckyr}{\ensuremath{\mathsf{SPI_R}}}
+
+%-------------cryptographic primitives-----------------
+\newcommand{\PRF}[2]{\mathsf{PRF}_{#1}(#2)}
+\newcommand{\iprf}[2]{\mathsf{IPRF}_{#1}(#2)}
+\newcommand{\MAC}[2]{\mathsf{MAC}_{#1}(#2)}
+\newcommand{\SE}{\mathsf{SE}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\ENC}[2]{\mathsf{Enc}_{#1}(#2)}
+\newcommand{\DEC}[2]{\mathsf{Dec}_{#1}(#2)}
+\newcommand{\Decrypt}{\mathsf{Decrypt}}
+\newcommand{\Encrypt}{\mathsf{Encrypt}}
+\newcommand{\SIGN}{\mathsf{Sign}}
+\newcommand{\Vfy}{\mathsf{Vfy}}
+\newcommand{\Hash}{\mathsf{h}}
+\newcommand{\PKE}{\mathsf{PK.Enc}}
+\newcommand{\PKD}{\mathsf{PK.Dec}}
+
+
+%---------------Algo-------------------
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+\newcommand{\bits}{\{0,1\}}
+
+\begin{document}
+
+
+
+\begin{protocol}{2}
+
+\participants{\doesinabox{Client $C$\\ $ $}}
+		{\doesinabox{Server $S$\\ $(sk_S,pk_S,cert_S)$}}
+
+%----------------------------------------
+\protocolline
+%\subprotocolcaption{{\bf IKE\_SA\_INIT}}
+
+%\doesA{$r_C \rand \bits^{224}$}
+%%\doesA{$t_C \leftarrow getTime()[32]$}
+%%\doesA{$r_C \leftarrow t_C||r'_C$}
+%\doesA{$CH \leftarrow (3.3,r_C,\vec{cs},\vec{cm},ext)$}
+
+\AtoB{ClientHello}
+
+\AfromB{\bf HelloVerifyRequest(cookie)}
+
+\AtoB{\bf ClientHello(cookie)}
+
+%\doesB{$r_S \rand \bits^{224}$}
+%%\doesB{$t_S \leftarrow getTime()[32]$}
+%%\doesB{$r_S \leftarrow t_S||r'_S$}
+%\doesB{Select $cs$ from $\vec{cs}$}
+%\doesB{Select $cm$ from $\vec{cm}$}
+%\doesB{$SH \leftarrow (3.3,r_S,SID,cs,cm,ext)$}
+%\doesB{$CRT \leftarrow (cert_S)$}
+%%\doesB{$y \rand \mathbb{Z}_q, Y \leftarrow g^y \bmod p$}
+%%\doesB{$\sigma_S \leftarrow \SIGN_{sk_S}(r_C,r_S,p,g,Y)$}
+%%\doesB{$SKE \leftarrow (p,g,Y,\sigma_S)$}
+
+\AfromB{ServerHello,Certificate,ServerHelloDone}
+
+%\doesA{$[CRT \leftarrow (cert_C)]$}
+%\doesA{$pk_S \leftarrow cert_S$}
+%\doesA{$pms \rand \bits^{368}$}
+%\doesA{$CKE \rand \PKE_{pk_S}(pms)$}
+%\doesA{$[CV \leftarrow \sigma_C \leftarrow \SIGN_{sk_C}(CH, ..., CKE)]$}
+
+\AtoB{ClientKeyExchange}
+\AtoB{ChangeCipherSpec}
+
+
+%\doesB{$pms \leftarrow \PKD_{sk_S}(CKE)$}
+
+%----------------------------------------
+%\protocolline
+%%\subprotocolcaption{{\bf Key Derivation}}
+%
+%\subprotocolcaption{$ms \leftarrow \PRF{pms}{l_1,r_C,r_S}$}
+%\subprotocolcaption{$k_{enc}^{CS},k_{enc}^{SC},k_{mac}^{CS},k_{mac}^{SC} \leftarrow \PRF{ms}{l_2,r_C,r_S}$}
+
+%----------------------------------------
+%\protocolline
+
+%\doesA{}
+%\doesA{$FIN_C \leftarrow \PRF{ms}{l_3,\Hash(CH,...,CKE[,CV])}$}
+
+\AtoB{ClientFinished}
+
+%\doesB{$FIN_S \leftarrow \PRF{ms}{l_4,\Hash(CH,...,FIN_C)}$}
+
+\AfromB{ChangeCipherSpec}
+\AfromB{ServerFinished}
+
+
+
+
+
+\end{protocol}
+
+
+
+\end{document}

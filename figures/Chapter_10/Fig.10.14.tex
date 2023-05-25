@@ -1,0 +1,98 @@
+\documentclass{standalone}
+\usepackage{protocol}
+\usepackage{amsfonts}
+\usepackage{amsmath}
+
+%---------------IKE abbreviations-----------------
+\newcommand{\ckyi}{\ensuremath{\mathsf{SPI_I}}}
+\newcommand{\ckyr}{\ensuremath{\mathsf{SPI_R}}}
+
+%-------------cryptographic primitives-----------------
+\newcommand{\PRF}[2]{\mathsf{PRF}_{#1}(#2)}
+\newcommand{\iprf}[2]{\mathsf{IPRF}_{#1}(#2)}
+\newcommand{\MAC}[2]{\mathsf{MAC}_{#1}(#2)}
+\newcommand{\SE}{\mathsf{SE}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\ENC}[2]{\mathsf{Enc}_{#1}(#2)}
+\newcommand{\DEC}[2]{\mathsf{Dec}_{#1}(#2)}
+\newcommand{\Decrypt}{\mathsf{Decrypt}}
+\newcommand{\Encrypt}{\mathsf{Encrypt}}
+\newcommand{\SIGN}{\mathsf{Sign}}
+\newcommand{\Vfy}{\mathsf{Vfy}}
+\newcommand{\Hash}{\mathsf{h}}
+
+%---------------Algo-------------------
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+\newcommand{\bits}{\{0,1\}}
+
+\begin{document}
+
+
+
+\begin{protocol}{2}
+
+\participants{\doesinabox{Client $C$\\ $[(sk_C,pk_C,cert_C)]$}}
+		{\doesinabox{Server $S$\\ $(sk_S,pk_S,cert_S)$}}
+
+%----------------------------------------
+\protocolline
+%\subprotocolcaption{{\bf IKE\_SA\_INIT}}
+
+\doesA{$r'_C \rand \bits^{224}$}
+\doesA{$t_C \leftarrow getTime()[32]$}
+\doesA{$r_C \leftarrow t_C|r'_C$}
+\doesA{$CH \leftarrow (3.3,r_C,\vec{cs},\vec{cm})$}
+\AtoB{CH}
+
+\doesB{$r'_S \rand \bits^{224}$}
+\doesB{$t_S \leftarrow getTime()[32]$}
+\doesB{$r_S \leftarrow t_S|r'_S$}
+\doesB{Select $cs$ from $\vec{cs}$}
+\doesB{Select $cm$ from $\vec{cm}$}
+\doesB{Choose $SID$}
+\doesB{$SH \leftarrow (3.2,r_S,SID,cs,cm)$}
+\doesB{$CRT \leftarrow (cert_S)$}
+\doesB{$y \rand \mathbb{Z}_q, Y \leftarrow g^y \bmod p$}
+\doesB{$\sigma_S \leftarrow \SIGN_{sk_S}(r_C,r_S,p,g,Y)$}
+\doesB{$SKE \leftarrow (p,g,Y,\sigma_S)$}
+
+\AfromB{SH,CRT,SKE,[CReq,]SHD}
+
+\doesA{$[CRT \leftarrow (cert_C)]$}
+\doesA{$x \rand \mathbb{Z}_q, X \leftarrow g^x \bmod p$}
+\doesA{$CKE \leftarrow (X)$}
+\doesA{$[CV \leftarrow \sigma_C \leftarrow \SIGN_{sk_C}(CH, ..., CKE)]$}
+
+\AtoB{[CRT,]CKE[,CV]}
+\AtoB{CCS}
+%----------------------------------------
+\protocolline
+%\subprotocolcaption{{\bf Key Derivation}}
+
+\subprotocolcaption{$pms \leftarrow CDH(Y,X)$}
+\subprotocolcaption{$ms \leftarrow \PRF{pms}{l_1,r_C|r_S}$}
+\subprotocolcaption{$k_{mac}^{CS}|k_{mac}^{SC}|k_{enc}^{CS}|k_{enc}^{SC}|IV^{CS}|IV^{SC} \leftarrow \PRF{ms}{l_2,r_S|r_C}$}
+
+%----------------------------------------
+\protocolline
+
+\doesA{}
+\doesA{$FIN_C \leftarrow \PRF{ms}{l_3,\Hash(CH,...,CKE[,CV])}$}
+
+\AtoB{\ENC{k_{enc}^{CS}}{FIN_C,\MAC{k_{mac}^{CS}}{FIN_C},pad}}
+
+\doesB{$FIN_S \leftarrow \PRF{ms}{l_4,\Hash(CH,...,FIN_C)}$}
+
+\AfromB{CCS}
+\AfromB{\ENC{k_{enc}^{SC}}{FIN_C,\MAC{k_{mac}^{SC}}{FIN_S},pad}}
+
+
+
+
+
+\end{protocol}
+
+
+
+\end{document}
