@@ -1,0 +1,103 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\input{commanddefs}
+
+\begin{document}
+
+\begin{tikzpicture}[>=stealth]
+
+%\useasboundingbox (0,0) rectangle (16,-6.5);
+\sffamily
+\small
+
+\newcommand{\xC}{2}
+\newcommand{\xKAS}{8}
+\newcommand{\xTGS}{\xKAS}
+\newcommand{\xS}{14}
+
+% party C
+\draw[dashed] (\xC-2,0.5)--(\xC+2,0.5)--(\xC+2,-0.8)--(\xC-2,-0.8)--(\xC-2,0.5);
+\draw (\xC,0) node[rectangle,draw,rounded corners] {\textbf{$C$}};
+\draw (\xC,-0.5) node {$K_{C,KAS}$} ;
+
+% party KAS
+\draw[dashed] (\xKAS-2,0.5)--(\xKAS+2,0.5)--(\xKAS+2,-0.8)--(\xKAS-2,-0.8)--(\xKAS-2,0.5);
+\draw (\xKAS,0) node[rectangle,draw,rounded corners] {\textbf{$KAS$}};
+\draw (\xKAS,-0.5) node {$K_{C,KAS}, K_{KAS,TGS}$} ;
+
+% interaction between C and KAS
+\newcommand{\yCKAS}{-1.5}
+\draw (\xC,\yCKAS) node {$n_{1} \gets \{0,1\}^{\lambda_{1}}$};
+\data{->}{\yCKAS-0.5}{\xC}{\xKAS}{$id_{C}, id_{TGS}, n_{1}$};
+\draw (\xKAS,\yCKAS-1.0) node {$k_{C,TGS} \gets \{0,1\}^{\lambda_{1}}$};
+\draw (\xKAS,\yCKAS-1.5) node {$TGT \gets \Enc_{K_{KAS,TGS}}(k_{C,TGS},ts_{KAS},id_{C})$};
+\draw (\xKAS,\yCKAS-2.0) node {$ct_{1} \gets \Enc_{K_{C,KAS}}(k_{C,TGS},n_{1},ts_{KAS},id_{TGS})$};
+\data{<-}{\yCKAS-3.0}{\xC}{\xKAS}{$id_{C},TGT,ct_{1}$};
+\draw (\xC,\yCKAS-3.5) node {$(k_{C,TGS}',n_{1}',ts_{KAS}',id_{TGS}') \gets \Dec_{K_{C,KAS}}(ct_{1})$};
+\draw (\xC,\yCKAS-4.0) node {verify $n_{1}',ts'_{KAS},id_{TGS}'$};
+
+\newcommand{\yCTGS}{\yCKAS-5.0}
+% party TGS
+\draw[dashed] (\xTGS-2,\yCTGS)--(\xTGS+2,\yCTGS)--(\xTGS+2,\yCTGS-1.3)--(\xTGS-2,\yCTGS-1.3)--(\xTGS-2,\yCTGS);
+\draw (\xTGS,\yCTGS-0.5) node[rectangle,draw,rounded corners] {\textbf{$TGS$}};
+\draw (\xTGS,\yCTGS-1.0) node {$K_{KAS,TGS},K_{TGS,S}$} ;
+
+% interaction between C and TGS
+\draw (\xC,\yCTGS-2.0) node {$ct_{2} \gets \Enc_{k'_{C,TGS}}(id_{C},ts_{C})$};
+\draw (\xC,\yCTGS-2.5) node {$n_{3} \gets \{0,1\}^{\lambda_{1}}$};
+\data{->}{\yCTGS-3.0}{\xC}{\xTGS}{$TGT,ct_{2},id_{S},n_{3}$};
+\draw (\xTGS,\yCTGS-3.5) node {$k_{C,S} \gets \{0,1\}^{\lambda_{1}}$};
+\draw (\xTGS,\yCTGS-4.0) node {$(k_{C,TGS}',ts_{KAS}',id_{C}') \gets \Dec_{K_{KAS,TGS}}(TGT)$};
+\draw (\xTGS,\yCTGS-4.5) node {verify $ts_{KAS}'$};
+\draw (\xTGS,\yCTGS-5.0) node {$(id_{C}'',ts_{C}') \gets \Dec_{k_{C,TGS}'}(ct_{2})$};
+\draw (\xTGS,\yCTGS-5.5) node {verify $(id_{C}'=id_{C}''),ts_{C}'$};
+\draw (\xTGS,\yCTGS-6.0) node {$ST \gets \Enc_{K_{TGS,S}}(k_{C,S},ts_{TGS},id_{C}')$};
+\draw (\xTGS,\yCTGS-6.5) node {$ct_{3} \gets \Enc_{k_{C,TGS}'}(k_{C,S},n_{3},ts_{TGS},id_{S})$};
+\data{<-}{\yCTGS-7.5}{\xC}{\xTGS}{$id_{C},ST,ct_{3}$};
+\draw (\xC,\yCTGS-8.0) node {$(k_{C,S}',n_{3}',ts_{TGS}',id_{S}') \gets \Dec_{k_{C,TGS}}(ct_{3})$};
+\draw (\xC,\yCTGS-8.5) node {verify $n_{3}',ts_{TGS}',id_{S}'$};
+
+\newcommand{\yCS}{\yCTGS-9}
+% party S
+\draw[dashed] (\xS-2,\yCS+1.5)--(\xS+2,\yCS+1.5)--(\xS+2,\yCS+0.2)--(\xS-2,\yCS+0.2)--(\xS-2,\yCS+1.5);
+\draw (\xS,\yCS+1) node[rectangle,draw,rounded corners] {\textbf{$S$}};
+\draw (\xS,\yCS+0.5) node {$K_{TGS,S}$} ;
+
+% interaction between C and S
+\draw (\xC,\yCS) node {$ct_{4} \gets \Enc_{k_{C,S}'}(id_{C},ts_{C}^{\dagger})$};
+\data{->}{\yCS-0.5}{\xC}{\xS}{$ST,ct_{3}$};
+\draw (\xS,\yCS-1.0) node {$(k_{C,S}'',ts_{TGS}'',id_{C}''') \gets \Dec_{K_{TGS,S}}(ST)$};
+\draw (\xS,\yCS-1.5) node {verify $ts_{TGS}''$};
+\draw (\xS,\yCS-2.0) node {$(id_{C}'''',ts_{C}^{\dagger'}) \gets \Dec_{k_{C,S}''}(ct_{4})$};
+\draw (\xS,\yCS-2.5) node {verify $(id_{C}'''=id_{C}''''),ts_{C}^{\dagger'}$};
+\draw (\xS,\yCS-3.0) node {$ct_{5} \gets \Enc_{k_{C,S}''}(ts_{C}^{\dagger'})$};
+\data{<-}{\yCS-3.5}{\xC}{\xS}{$ct_{5}$};
+\draw (\xC,\yCS-4.0) node {$ts_{C}^{\dagger\dagger} \gets \Dec_{k_{C,S}}(ct_{5})$};
+\draw (\xC,\yCS-4.5) node {verify $ts_{C}^{\dagger}=ts_{C}^{\dagger\dagger}$};
+\draw (\xC,\yCS-5.0) node {ACCEPT};
+\draw (\xS,\yCS-5.0) node {ACCEPT};
+
+%   \data{->,dashed}{-1.5}{\nB}{\nC}{$Init$}
+%   \data{<-}{-2.2}{\nB}{\nC}{$m_1:  R_B.D$}
+%
+%   % Protokoll Pi_1
+%   \color{red}
+%   \data{<-}{-2.7}{\nA}{\nB}{$m_2: A.B.R_{A_1}.R_B$}
+%   \draw (\1,-3.2) node {\tiny $\alpha = [A.B.R_B.\{k\}_{e_{B,D}}]_{s_{B,D}}$} ;
+%   \data{->}{-3.6}{\nA}{\nB}{$m_3: [D.R_D.R_{A_1}\{k.\alpha\}_{e_{A,D}}]_{s_{A,D}}$}
+%   \data{<-,dashed}{-4.4}{\nA}{\nB}{$m_4: [A.R_D]_{s_{A,D}}$}
+%   \color{black}
+%
+%   % SSO Protokoll
+%
+%   \draw (\2,-4.7) node {\tiny $k_1 = \PRF(k,R_{A_1}.R_B)$} ;
+%   \draw (\3,-4.7) node {\tiny $k_1 = \PRF(k,R_{A_1}.R_B)$} ;
+%
+%   \data{->}{-5}{\nB}{\nC}{$m_5: \alpha$}
+%   \data{->}{-5.65}{\nB}{\nC}{$m_6: [D.R_{A_2}.R_B]_{k_1}$}
+%   \data{<-}{-6.3}{\nB}{\nC}{$m_7: [B.A.R_{A_2}]_{k_1}$}
+
+
+\end{tikzpicture}
+
+\end{document}

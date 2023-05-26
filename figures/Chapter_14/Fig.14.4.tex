@@ -1,0 +1,91 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\input{commands_ccs}
+
+\begin{document}
+
+
+
+\edef\KASX{0}
+\edef\ClientX{6}
+\edef\ServerX{12}
+\edef\StageLabelX{9}
+\edef\LeftX{0}
+\edef\RightX{18}
+\edef\CKArrowC{5.5}
+\edef\CKArrowK{4}
+\edef\CSArrowC{10}
+\edef\CSArrowS{11.5}
+% Set the starting Y coordinate
+\edef\Y{0}
+
+\begin{tikzpicture}[yscale=-0.45,>=latex]
+\tikzstyle{every node}=[font=\small]
+
+% Draw header boxes
+\node [rectangle,draw,inner sep=5pt,right] at (\KASX,\Y) {\textbf{KAS}};
+\node [rectangle,draw,inner sep=5pt,right] at (\ClientX,\Y) {\textbf{Client} $C$};
+\node [rectangle,draw,inner sep=5pt,right] at (\ServerX,\Y) {\textbf{Server} $S$};
+
+\NextLine[1.25]
+\KASAction{\textit{long-term keys:} $k_C, k_S$}
+\ClientAction{\textit{long-term key:} $k_C$}
+\ServerAction{\textit{long-term key:} $k_S$}
+
+\StageSeparator{\textit{Authentication Service (AS) exchange}}
+
+\ClientAction{$n_C \getsr \bit^\noncelength$}
+
+\ClientToKAS{$C, S, n_C$}{}
+
+\KASAction{$k_{CS} \getsr \KeySp$}
+\NextLine
+\KASAction{$t_{KAS} \gets \now()$}
+\NextLine
+\KASAction{$c_1 \getsr \Enc_{k_C}(k_{CS}, n_C, t_{KAS}, S)$}
+\NextLine
+\KASAction{$c_2 \getsr \Enc_{k_S}(k_{CS}, t_{KAS}, C)$}
+
+\NextLine[0.5]
+\KASToClient{$c_1, c_2$}{}
+\NextLine[-0.5]
+
+\ClientAction{$(k_{CS}, n_C', t_{KAS}, S') \gets \Dec_{k_C}(c_1)$ or reject}
+\NextLine
+\ClientAction{reject if $(n_C' \ne n_C)$ or $(S' \ne S)$}
+
+\StageSeparator{\textit{Client/Server Authentication (CS) exchange}}
+
+\ClientAction{$t_C \gets \now()$}
+\NextLine
+\ClientAction{\color{darkblue} [optional: $k_{CS}^* \getsr \KeySp^*$]}
+\NextLine
+\ClientAction{$c_3 \getsr \Enc_{k_{CS}}(C, t_C{\color{darkblue}[, k_{CS}^*]})$}
+
+\ClientToServer{$c_2, c_3$}{}
+\NextLine[-0.5]
+
+\ServerAction{$(k_{CS}, t_{KAS}, C) \gets \Dec_{k_S}(c_2)$ or reject}
+\NextLine
+\ServerAction{$(C', t_{C}{\color{darkblue}[, k_{CS}^*]}) \gets \Dec_{k_{CS}}(c_3)$ or reject}
+\NextLine
+\ServerAction{reject if $\lnot\timeok(t_{KAS}, t_C; \now())$}
+\NextLine
+\ServerAction{reject if $C \ne C'$}
+\NextLine
+\ServerAction{$c_4 \getsr \Enc_{k_{CS}}(t_C)$}
+\NextLine
+\ServerAction{accept \color{darkblue}[and output $k_{CS}^*$]}
+
+\ServerToClient{$c_4$}{}
+\NextLine[-0.5]
+
+\ClientAction{$t_C' \gets \Dec_{k_{CS}}(c_4)$ or reject}
+\NextLine
+\ClientAction{reject if $t_C' \ne t_C$}
+\NextLine
+\ClientAction{accept \color{darkblue}[and output $k_{CS}^*$]}
+
+\end{tikzpicture}
+
+\end{document}
