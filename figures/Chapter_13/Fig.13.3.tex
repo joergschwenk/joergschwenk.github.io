@@ -1,0 +1,72 @@
+\documentclass{standalone}
+\usepackage{protocol}
+
+%=================MathAbbrevs=====================
+\newcommand{\bits}{\ensuremath{\{0,1\}}}
+\newcommand{\rand}{\stackrel{{\scriptscriptstyle\$}}{\leftarrow}}
+%=================CryptoPrimitives=====================
+\newcommand{\HKDF}{\mathsf{HKDF}}
+%\newcommand{AE}{\mathsf{AEAD}}
+
+\begin{document}
+
+\begin{protocol}{2}
+
+\participants{\doesinabox{Client \\ $CHK:=(pk_C,sk_C)=((e_C,n_C),d_C)$\\ }}
+		{\doesinabox{Server \\ $HK:=(pk_1, sk_1)=((e_1,n_1),d_1)$\\ $SK:=(pk_2,sk_2)=((e_2,n_2),d_2)$}}
+\protocolline
+\doesB{$r_S \rand \bits^{64}$}
+%\doesB{{\tt SSPK}=}
+%\doesB{{\tt SSH\_SMSG\_PUBLIC\_KEY}=}
+\doesB{\tt PUBLIC\_KEY=}
+\doesB{$(pk_1,pk_2,\vec{enc}, \vec{auth},\vec{ext},r_S)$}
+\doesB{$sid=MD5(pk_1|pk_2|r_S)$}
+
+\AfromB{{\tt PUBLIC\_KEY}}
+
+\doesA{$sid=MD5(pk_1|pk_2|r_S)$}
+\doesA{$k \rand \bits^{256}$}
+\doesA{$\{pk_A,pk_B\}=\{pk_1,pk_2\}$}
+\doesA{$|n_B|+128 \leq |n_A|$}
+\doesA{$c_k=Enc_{pk_A}(Enc_{pk_B}(k))$}
+%\doesA{{\tt SCSK}=}
+%\doesA{{\tt SSH\_CMSG\_SESSION\_KEY}=}
+\doesA{\tt SESSION\_KEY=}
+\doesA{$(enc,r_S,flags,c_k)$}
+
+\AtoB{\tt SESSION\_KEY}
+
+\doesA{$(k_{CS},k_{SC}) \leftarrow KDF(k)$}
+\doesB{$(k_{CS},k_{SC}) \leftarrow KDF(k)$}
+
+\protocolline
+\doesA{encrypt messages with $k_{CS}$}
+\doesB{encrypt messages with $k_{SC}$}
+
+%\doesB{\tt SSS=SSH\_SMSG\_SUCCESS}
+\AfromB{\tt SUCCESS}
+
+%\doesA{{\tt SCU=SSH\_CMSG\_USER}}
+\doesA{{\tt USER}=(username)}
+\AtoB{\tt USER}
+
+%\doesB{\tt SSF=SSH\_SMSG\_FAILURE}
+\AfromB{\tt FAILURE}
+
+\doesA{{\tt AUTH\_RSA}$=(n_C)$}
+\AtoB{\tt AUTH\_RSA}
+
+\doesB{$chall_S \rand \bits^{256}$}
+\doesB{$c_{chall}=Enc_{pk_C}(chall_S)$}
+\doesB{{\tt RSA\_CHALLENGE}$=c_{chall}$}
+\AfromB{\tt RSA\_CHALLENGE}
+
+\doesA{$resp_C=MD5(chall_S|sid)$}
+\doesA{{\tt RSA\_RESPONSE}$=resp_C$}
+\AtoB{\tt RSA\_RESPONSE}
+
+\AfromB{\tt SUCCESS}
+
+\end{protocol}
+
+\end{document}
