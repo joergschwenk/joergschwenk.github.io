@@ -1,42 +1,191 @@
-<html>
-    <h1>Web page for the book 'Guide to Internet Cryptography'</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Guide to Internet Cryptography – Companion Material</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <p>This page is still under construction.</p>
+    <style>
+        :root {
+            --bg: #f5f7fa;
+            --card: #ffffff;
+            --primary: #1f3a5f;
+            --secondary: #3c6e71;
+            --text: #2b2b2b;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+        }
 
-    <p>This page contains aditional accompanying material for my book 'Guide to Internet Cryptography'. 
-        I intent to make all Figures from the book available for use in course material, 
-        to provide answeers for the 'Problems' sections of the different chapters, 
-        to update existing and provide new material, including new chapters.
-    </p>
+        * {
+            box-sizing: border-box;
+        }
 
-    <h2>Figures from the book</h2>
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
 
-    <a href="/figures/Chapter_1.zip">Figures from Chapter 1 - The Internet</a><br>
-    <a href="/figures/Chapter_2.zip">Figures from Chapter 2 - Cryptography: Confidentiality</a><br>
-    <a href="/figures/Chapter_3.zip">Figures from Chapter 3 - Cryptography: Integrity and Authenticity</a><br>
-    <a href="/figures/Chapter_4.zip">Figures from Chapter 4 - Cryptographic Protocols</a><br>
-    <a href="/figures/Chapter_5.zip">Figures from Chapter 5 - Point-to-Point Security</a><br>
-    <a href="/figures/Chapter_6.zip">Figures from Chapter 6 - Wireless LAN (WLAN)</a><br>
-    <a href="/figures/Chapter_7.zip">Figures from Chapter 7 - Cellular Networks</a><br>
-    <a href="/figures/Chapter_8.zip">Figures from Chapter 8 - IP Security (IPsec)</a><br>
-    <a href="/figures/Chapter_9.zip">Figures from Chapter 9 - Security of HTTP</a><br>
-    <a href="/figures/Chapter_10.zip">Figures from Chapter 10 - Transport Layer Security</a><br>
-    <a href="/figures/Chapter_11.zip">Figures from Chapter 11 - A Short History of TLS</a><br>
-    <a href="/figures/Chapter_12.zip">Figures from Chapter 12 - Attacks on SSL and TLS</a><br>
-    <a href="/figures/Chapter_13.zip">Figures from Chapter 13 - Secure Shell (SSH)</a><br>
-    <a href="/figures/Chapter_14.zip">Figures from Chapter 14 - Kerberos</a><br>
-    <a href="/figures/Chapter_15.zip">Figures from Chapter 15 - DNS Security</a><br>
-    <a href="/figures/Chapter_16.zip">Figures from Chapter 16 - File Encryption: PGP</a><br>
-    <a href="/figures/Chapter_17.zip">Figures from Chapter 17 - Email Security: S/MIME</a><br>
-    <a href="/figures/Chapter_18.zip">Figures from Chapter 18 - Attacks on S/MIME and OpenPGP</a><br>
-    <a href="/figures/Chapter_19.zip">Figures from Chapter 19 - Email: Protocols and SPAM</a><br>
-    <a href="/figures/Chapter_20.zip">Figures from Chapter 20 - Web Security and Single Sign-On Protcols</a><br>
-    <a href="/figures/Chapter_21.zip">Figures from Chapter 21 - Cryptographic Data Formats</a><br>
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 3rem 1rem;
+            text-align: center;
+        }
 
-    <h2>Solutions to the problems from the book</h2>
-    
-    <a href="/solutions/Section_1_Solutions.pdf">Solutions to the problems from Chapter 1 - The Internet</a><br>
-    <a href="/solutions/Section_2_Solutions.pdf">Solutions to the problems from Chapter 2 - Cryptography: Confidentiality</a><br>
+        header h1 {
+            margin: 0 0 0.5rem;
+            font-size: clamp(1.8rem, 4vw, 2.6rem);
+        }
 
+        header p {
+            margin: 0;
+            max-width: 700px;
+            margin-inline: auto;
+            opacity: 0.95;
+        }
 
+        main {
+            max-width: 1100px;
+            margin: 2.5rem auto;
+            padding: 0 1rem;
+        }
+
+        section {
+            margin-bottom: 3rem;
+        }
+
+        section h2 {
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .intro {
+            background: var(--card);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .card {
+            background: var(--card);
+            padding: 1.2rem 1.4rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+        }
+
+        .card a {
+            text-decoration: none;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .card span {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--muted);
+            margin-top: 0.3rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                padding: 2.2rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Guide to Internet Cryptography</h1>
+    <p>Companion material, figures, solutions, and updates for teaching and research</p>
+</header>
+
+<main>
+
+    <section class="intro">
+        <p>
+            This page provides accompanying material for the book
+            <strong>“Guide to Internet Cryptography”</strong>.
+            Figures from the book are available for use in course material.
+            Solutions to selected problems, updates, and additional chapters
+            will be added over time.
+        </p>
+    </section>
+
+    <section>
+        <h2>Figures from the Book</h2>
+        <div class="grid">
+
+            <div class="card"><a href="/figures/Chapter_1.zip">Chapter 1 – The Internet</a></div>
+            <div class="card"><a href="/figures/Chapter_2.zip">Chapter 2 – Confidentiality</a></div>
+            <div class="card"><a href="/figures/Chapter_3.zip">Chapter 3 – Integrity & Authenticity</a></div>
+            <div class="card"><a href="/figures/Chapter_4.zip">Chapter 4 – Cryptographic Protocols</a></div>
+            <div class="card"><a href="/figures/Chapter_5.zip">Chapter 5 – Point-to-Point Security</a></div>
+            <div class="card"><a href="/figures/Chapter_6.zip">Chapter 6 – Wireless LAN</a></div>
+            <div class="card"><a href="/figures/Chapter_7.zip">Chapter 7 – Cellular Networks</a></div>
+            <div class="card"><a href="/figures/Chapter_8.zip">Chapter 8 – IP Security (IPsec)</a></div>
+            <div class="card"><a href="/figures/Chapter_9.zip">Chapter 9 – Security of HTTP</a></div>
+            <div class="card"><a href="/figures/Chapter_10.zip">Chapter 10 – TLS</a></div>
+            <div class="card"><a href="/figures/Chapter_11.zip">Chapter 11 – History of TLS</a></div>
+            <div class="card"><a href="/figures/Chapter_12.zip">Chapter 12 – Attacks on SSL/TLS</a></div>
+            <div class="card"><a href="/figures/Chapter_13.zip">Chapter 13 – Secure Shell (SSH)</a></div>
+            <div class="card"><a href="/figures/Chapter_14.zip">Chapter 14 – Kerberos</a></div>
+            <div class="card"><a href="/figures/Chapter_15.zip">Chapter 15 – DNS Security</a></div>
+            <div class="card"><a href="/figures/Chapter_16.zip">Chapter 16 – PGP</a></div>
+            <div class="card"><a href="/figures/Chapter_17.zip">Chapter 17 – S/MIME</a></div>
+            <div class="card"><a href="/figures/Chapter_18.zip">Chapter 18 – Attacks on Email Crypto</a></div>
+            <div class="card"><a href="/figures/Chapter_19.zip">Chapter 19 – Email & SPAM</a></div>
+            <div class="card"><a href="/figures/Chapter_20.zip">Chapter 20 – Web Security & SSO</a></div>
+            <div class="card"><a href="/figures/Chapter_21.zip">Chapter 21 – Crypto Data Formats</a></div>
+
+        </div>
+    </section>
+
+    <section>
+        <h2>Solutions to Problems</h2>
+        <div class="grid">
+
+            <div class="card">
+                <a href="/solutions/Section_1_Solutions.pdf">Chapter 1 – The Internet</a>
+                <span>PDF solutions</span>
+            </div>
+
+            <div class="card">
+                <a href="/solutions/Section_2_Solutions.pdf">Chapter 2 – Confidentiality</a>
+                <span>PDF solutions</span>
+            </div>
+
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    © Guide to Internet Cryptography · Companion Website
+</footer>
+
+</body>
 </html>
